@@ -29,8 +29,8 @@ export default function App({navigation}) {
       <Stack.Navigator initialRouteName="Splash">
         <Stack.Screen name="Splash" component={Splash}/>
         <Stack.Screen name="Onboarding" component={Onboarding} options={{ headerShown: false}}/>
-        <Stack.Screen name="Login" component={Login} />
-        <Stack.Screen name="Signup" component={Signup} />
+        <Stack.Screen name="Login" component={Login} options={{ headerShown: false}}/>
+        <Stack.Screen name="Signup" component={Signup} options={{ headerShown: false}}/>
         <Stack.Screen name="ConfirmNumber" component={ConfirmNumber} />
         <Stack.Screen name="ConfirmOtp" component={ConfirmOtp} />
         <Stack.Screen name="AccountSuccessfull" component={AccountSuccessfull} />
