@@ -15,6 +15,17 @@ import {
 } from 'react-native';
 import LogoIMG from '../assets/img/splash-logo.svg';
 import { BlurView } from 'expo-blur';
+import { auth } from '../firebaseConfig'; // Adjust the path as needed
+import {
+  signInWithPhoneNumber,
+  PhoneAuthProvider,
+  signInWithCredential,
+  RecaptchaVerifier,
+} from 'firebase/auth';
+import {
+  createUserWithEmailAndPassword,
+  signInWithEmailAndPassword,
+} from "firebase/auth"
 
 export default function Signup({ navigation }) {
   const [phone, setPhone] = useState('');
@@ -25,13 +36,15 @@ export default function Signup({ navigation }) {
   const [secureText, setSecureText] = useState(true);
   const [confirmSecureText, setConfirmSecureText] = useState(true);
   const [errors, setErrors] = useState({});
+  const [errorFb, setErrorFb] = useState("");
   const [step, setStep] = useState(null); // null, 'verify', 'otp', 'success'
   const [otp, setOtp] = useState(['', '', '', '']);
   const [otpError, setOtpError] = useState('');
   const otpInputs = useRef([]);
+  const [confirmationResult, setConfirmationResult] = useState(null);
 
 
-  const handleSignUp = () => {
+  const handleSignUp = async () => {
     // TODO: Add real auth logic here
     // const newErrors = {};
     // const nameRegex = /^[A-Za-z ]+$/;
@@ -65,10 +78,46 @@ export default function Signup({ navigation }) {
     //   // TODO: Handle actual signup logic
     // }
 
-    setStep('verify');
+    try {
+      await createUserWithEmailAndPassword(auth, email, password);
+      console.log("User signed up successfully!");
+      setErrorFb("");
+      setStep('verify');
+    } catch (err) {
+      setErrorFb(err.message);
+    }
+
+    
 
 
 
+  };
+
+  const sendOtp = async () => {
+    try {
+      const appVerifier = new RecaptchaVerifier('recaptcha-container', {
+        size: 'invisible',
+        callback: (response) => {
+          // reCAPTCHA solved, allow signInWithPhoneNumber.
+        },
+      }, auth);
+
+      const confirmation = await signInWithPhoneNumber(auth, `+91${phone}`, appVerifier);
+      setConfirmationResult(confirmation);
+      setStep('otp');
+    } catch (error) {
+      Alert.alert('Error', error.message);
+    }
+  };
+
+  const verifyOtp = async () => {
+    try {
+      const code = otp.join('');
+      await confirmationResult.confirm(code);
+      setStep('success');
+    } catch (error) {
+      setOtpError('Incorrect OTP');
+    }
   };
 
   const clearError = (fieldName) => {

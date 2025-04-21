@@ -5,6 +5,8 @@ import Splash from './screens/Splash';
 import Onboarding from './screens/Onboarding';
 import Login from './screens/Login';
 import Signup from './screens/Signup';
+import Signup2 from './screens/Signup2';
+import ForgotPassword from './screens/ForgotPassword';
 import ConfirmNumber from './screens/ConfirmNumber';
 import ConfirmOtp from './screens/ConfirmOtp';
 import AccountSuccessfull from './screens/AccountSuccessfull';
@@ -31,10 +33,12 @@ export default function App({navigation}) {
         <Stack.Screen name="Onboarding" component={Onboarding} options={{ headerShown: false}}/>
         <Stack.Screen name="Login" component={Login} options={{ headerShown: false}}/>
         <Stack.Screen name="Signup" component={Signup} options={{ headerShown: false}}/>
+        <Stack.Screen name="Signup2" component={Signup2} options={{ headerShown: false}}/>
+        <Stack.Screen name="ForgotPassword" component={ForgotPassword} options={{ headerShown: false}}/>
         <Stack.Screen name="ConfirmNumber" component={ConfirmNumber} />
         <Stack.Screen name="ConfirmOtp" component={ConfirmOtp} />
         <Stack.Screen name="AccountSuccessfull" component={AccountSuccessfull} />
-        <Stack.Screen name="Homepage" component={Homepage} />
+        <Stack.Screen name="Homepage" component={Homepage} options={{ headerShown: false}}/>
         <Stack.Screen name="ItemDetail" component={ItemDetail} />
         <Stack.Screen name="Categories" component={Categories} />
         <Stack.Screen name="Search" component={Search} />

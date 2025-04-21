@@ -10,6 +10,9 @@ export default function Splash({ navigation }) {
         <Button
           title="Go to Onboarding"
           onPress={() => navigation.navigate('Onboarding')}></Button>
+          <Button
+          title="Go to Homepage"
+          onPress={() => navigation.navigate('Homepage')}></Button>
       </View>
       <VEGETABLEIMG width={500} height={500} style={styles.imageVegetable} />
     </View>
