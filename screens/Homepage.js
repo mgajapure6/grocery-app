@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useContext, useState } from 'react';
 import {
   View,
   Text,
@@ -11,54 +11,58 @@ import {
   Platform,
 } from 'react-native';
 import { Feather } from '@expo/vector-icons';
-import LogoIMG from '../assets/img/splash-logo.svg'; // Adjust path
+import { CartContext } from '../contexts/CartContext';
+import { addresses, categories, banner, suggestedItems, bestDealItems } from '../data/staticData';
 
-
-//Use this images, 1. Vegetables and Fruits: https://images.unsplash.com/photo-1488459716781-31db52582fe9, 
-// 2.Dairy and Breakfast: https://images.unsplash.com/photo-1504754524776-8f4f37790ca0 
-// 3.Cold Drinks and Juice: https://images.unsplash.com/photo-1682987210989-2cf712b07429 
-// 4.Instant and Frozen Food: https://assets.grok.com/users/c773460d-3fdb-4413-b386-5e6ae75d11d9/generated/Tgkiy3y6r1huJtRQ/image.jpg 
-// 5.Tea and Coffee: https://assets.grok.com/users/c773460d-3fdb-4413-b386-5e6ae75d11d9/generated/u65BdxRnVs1TQkHu/image.jpg 
-// 6.Atta Rice and Dals: https://assets.grok.com/users/c773460d-3fdb-4413-b386-5e6ae75d11d9/generated/P5MK3NpYFqQDzDI2/image.jpg 
-// 7.Masalas Oils and Dry Fruits: https://assets.grok.com/users/c773460d-3fdb-4413-b386-5e6ae75d11d9/generated/MZorng71SIa1Luvn/image.jpg 
-// 8.Chicken Meat and Fish:https://images.unsplash.com/photo-1673436977947-0787164a9abc
-// Static data
-const addresses = ['123 Main St, City', '456 Oak Ave, Town', '789 Pine Rd, Village'];
-const categories = [
-  { id: '1', name: 'Vegetables and Fruits', image: 'https://images.unsplash.com/photo-1488459716781-31db52582fe9' },
-  { id: '2', name: 'Dairy and Breakfast', image: 'https://images.unsplash.com/photo-1504754524776-8f4f37790ca0' },
-  { id: '3', name: 'Cold Drinks and Juice', image: 'https://images.unsplash.com/photo-1682987210989-2cf712b07429' },
-  { id: '4', name: 'Instant and Frozen Food', image: 'https://assets.grok.com/users/c773460d-3fdb-4413-b386-5e6ae75d11d9/generated/Tgkiy3y6r1huJtRQ/image.jpg' },
-  { id: '5', name: 'Tea and Coffee', image: 'https://assets.grok.com/users/c773460d-3fdb-4413-b386-5e6ae75d11d9/generated/u65BdxRnVs1TQkHu/image.jpg' },
-  { id: '6', name: 'Atta, Rice and Dals', image: 'https://assets.grok.com/users/c773460d-3fdb-4413-b386-5e6ae75d11d9/generated/P5MK3NpYFqQDzDI2/image.jpg' },
-  { id: '7', name: 'Masalas, Oils and Dry Fruits', image: 'https://assets.grok.com/users/c773460d-3fdb-4413-b386-5e6ae75d11d9/generated/MZorng71SIa1Luvn/image.jpg' },
-  { id: '8', name: 'Chicken, Meat and Fish', image: 'https://images.unsplash.com/photo-1673436977947-0787164a9abc' },
-];
-const bestDeals = [
-  { id: '1', name: 'Fresh Apples', price: 2.99, image: 'https://images.unsplash.com/photo-1581891203469-db5113e1e537' },
-  { id: '2', name: 'Whole Milk', price: 3.49, image: 'https://images.unsplash.com/photo-1563636619-e9143da7973b' },
-  { id: '3', name: 'Orange Juice', price: 1.99, image: 'https://images.unsplash.com/photo-1599360889420-da1afaba9edc' },
-  { id: '4', name: 'Frozen Pizza', price: 4.99, image: 'https://images.unsplash.com/photo-1662043591509-25e91fc3e2a1' },
-];
-const bannerImage = 'https://images.unsplash.com/photo-1542838132-92c53300491e';
 
 export default function Homepage({ navigation }) {
+  const { cart, addToCart } = useContext(CartContext);
   const [selectedAddress, setSelectedAddress] = useState(addresses[0]);
   const [activeTab, setActiveTab] = useState('Home');
 
   const renderCategoryItem = ({ item }) => (
-    <TouchableOpacity style={styles.categoryCard} onPress={() => console.log(`Selected category: ${item.name}`)}>
-      <Image source={{ uri: item.image }} style={styles.categoryImage} />
+    <TouchableOpacity
+      style={styles.categoryCard}
+      onPress={() => console.log(`Selected category: ${item.name}`)}
+    >
+      <Image source={item.image} style={styles.categoryImage} />
       <Text style={styles.categoryName}>{item.name}</Text>
     </TouchableOpacity>
   );
 
   const renderBestDealItem = ({ item }) => (
     <View style={styles.dealCard}>
-      <Image source={{ uri: item.image }} style={styles.dealImage} />
+      <Image source={item.image} style={styles.dealImage} />
       <Text style={styles.dealName}>{item.name}</Text>
       <Text style={styles.dealPrice}>${item.price.toFixed(2)}</Text>
-      <TouchableOpacity style={styles.addToCartButton}>
+      {item.tag && (
+        <View style={styles.tagBadge}>
+          <Text style={styles.tagText}>{item.tag}</Text>
+        </View>
+      )}
+      <TouchableOpacity
+        style={styles.addToCartButton}
+        onPress={() => addToCart(item)}
+      >
+        <Text style={styles.addToCartText}>Add to Cart</Text>
+      </TouchableOpacity>
+    </View>
+  );
+
+  const renderSuggestedItem = ({ item }) => (
+    <View style={styles.dealCard}>
+      <Image source={item.image} style={styles.dealImage} />
+      <Text style={styles.dealName}>{item.name}</Text>
+      <Text style={styles.dealPrice}>${item.price.toFixed(2)}</Text>
+      {item.tag && (
+        <View style={[styles.tagBadge, styles.suggestedTag]}>
+          <Text style={styles.tagText}>{item.tag}</Text>
+        </View>
+      )}
+      <TouchableOpacity
+        style={styles.addToCartButton}
+        onPress={() => addToCart(item)}
+      >
         <Text style={styles.addToCartText}>Add to Cart</Text>
       </TouchableOpacity>
     </View>
@@ -68,17 +72,23 @@ export default function Homepage({ navigation }) {
     <View style={styles.container}>
       {/* Status Bar */}
       <View style={styles.statusBar}>
-        <View style={styles.addressContainer}>
+        <TouchableOpacity
+          style={styles.addressContainer}
+          onPress={() => console.log('Select address')}
+        >
           <Feather name="map-pin" size={20} color="#5ac268" />
           <Text style={styles.addressText} numberOfLines={1}>
-            {selectedAddress}
+            {selectedAddress.title}: {selectedAddress.address}
           </Text>
           <Feather name="chevron-down" size={20} color="#666" />
-        </View>
-        <TouchableOpacity style={styles.cartContainer} onPress={() => console.log('Cart pressed')}>
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={styles.cartContainer}
+          onPress={() => navigation.navigate('Cart')}
+        >
           <Feather name="shopping-cart" size={24} color="#5ac268" />
           <View style={styles.cartBadge}>
-            <Text style={styles.cartBadgeText}>2</Text>
+            <Text style={styles.cartBadgeText}>{cart.length}</Text>
           </View>
         </TouchableOpacity>
       </View>
@@ -95,7 +105,10 @@ export default function Homepage({ navigation }) {
               placeholderTextColor="#bbb"
             />
           </View>
-          <TouchableOpacity style={styles.filterButton} onPress={() => console.log('Filter pressed')}>
+          <TouchableOpacity
+            style={styles.filterButton}
+            onPress={() => console.log('Filter pressed')}
+          >
             <Feather name="filter" size={24} color="#5ac268" />
           </TouchableOpacity>
         </View>
@@ -103,12 +116,12 @@ export default function Homepage({ navigation }) {
         {/* Shop By Categories */}
         <View style={styles.sectionHeader}>
           <Text style={styles.sectionTitle}>Shop By Categories</Text>
-          <TouchableOpacity onPress={() => console.log('See All Categories')}>
+          <TouchableOpacity onPress={() => navigation.navigate('Categories')}>
             <Text style={styles.seeAllText}>See All</Text>
           </TouchableOpacity>
         </View>
         <FlatList
-          data={categories}
+          data={categories.homepage}
           renderItem={renderCategoryItem}
           keyExtractor={(item) => item.id}
           numColumns={4}
@@ -118,8 +131,28 @@ export default function Homepage({ navigation }) {
 
         {/* Banner */}
         <View style={styles.bannerContainer}>
-          <Image source={{ uri: bannerImage }} style={styles.bannerImage} />
+          <Image source={banner.image} style={styles.bannerImage} />
+          <View style={styles.bannerOverlay}>
+            <Text style={styles.bannerTitle}>{banner.title}</Text>
+            <Text style={styles.bannerSubtitle}>{banner.subtitle}</Text>
+          </View>
         </View>
+
+        {/* Suggested Items */}
+        <View style={styles.sectionHeader}>
+          <Text style={styles.sectionTitle}>Suggested for You</Text>
+          <TouchableOpacity onPress={() => console.log('See All Suggested')}>
+            <Text style={styles.seeAllText}>See All</Text>
+          </TouchableOpacity>
+        </View>
+        <FlatList
+          data={suggestedItems}
+          renderItem={renderSuggestedItem}
+          keyExtractor={(item) => item.id}
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          contentContainerStyle={styles.dealsList}
+        />
 
         {/* Best Deals */}
         <View style={styles.sectionHeader}>
@@ -129,7 +162,7 @@ export default function Homepage({ navigation }) {
           </TouchableOpacity>
         </View>
         <FlatList
-          data={bestDeals}
+          data={bestDealItems}
           renderItem={renderBestDealItem}
           keyExtractor={(item) => item.id}
           horizontal
@@ -149,7 +182,11 @@ export default function Homepage({ navigation }) {
             size={24}
             color={activeTab === 'Home' ? '#5ac268' : '#666'}
           />
-          <Text style={[styles.navText, activeTab === 'Home' && styles.navTextActive]}>Home</Text>
+          <Text
+            style={[styles.navText, activeTab === 'Home' && styles.navTextActive]}
+          >
+            Home
+          </Text>
         </TouchableOpacity>
         <TouchableOpacity
           style={styles.navItem}
@@ -163,21 +200,35 @@ export default function Homepage({ navigation }) {
             size={24}
             color={activeTab === 'Favorite' ? '#5ac268' : '#666'}
           />
-          <Text style={[styles.navText, activeTab === 'Favorite' && styles.navTextActive]}>Favorite</Text>
+          <Text
+            style={[
+              styles.navText,
+              activeTab === 'Favorite' && styles.navTextActive,
+            ]}
+          >
+            Favorite
+          </Text>
         </TouchableOpacity>
         <TouchableOpacity
           style={styles.navItem}
           onPress={() => {
-            setActiveTab('Cart');
-            console.log('Cart pressed');
+            setActiveTab('Categories');
+            navigation.navigate('Categories');
           }}
         >
           <Feather
-            name="shopping-cart"
+            name="grid"
             size={24}
-            color={activeTab === 'Cart' ? '#5ac268' : '#666'}
+            color={activeTab === 'Categories' ? '#5ac268' : '#666'}
           />
-          <Text style={[styles.navText, activeTab === 'Cart' && styles.navTextActive]}>Cart</Text>
+          <Text
+            style={[
+              styles.navText,
+              activeTab === 'Categories' && styles.navTextActive,
+            ]}
+          >
+            Categories
+          </Text>
         </TouchableOpacity>
         <TouchableOpacity
           style={styles.navItem}
@@ -191,7 +242,11 @@ export default function Homepage({ navigation }) {
             size={24}
             color={activeTab === 'User' ? '#5ac268' : '#666'}
           />
-          <Text style={[styles.navText, activeTab === 'User' && styles.navTextActive]}>User</Text>
+          <Text
+            style={[styles.navText, activeTab === 'User' && styles.navTextActive]}
+          >
+            User
+          </Text>
         </TouchableOpacity>
       </View>
     </View>
@@ -211,13 +266,13 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     borderBottomColor: '#ddd',
     backgroundColor: '#fff',
-    marginTop: 40
+    marginTop: Platform.OS === 'ios' ? 50 : 30,
   },
   addressContainer: {
     flexDirection: 'row',
     alignItems: 'center',
     flex: 1,
-    marginRight: 100,
+    marginRight: 10,
   },
   addressText: {
     fontSize: 16,
@@ -296,29 +351,48 @@ const styles = StyleSheet.create({
     marginBottom: 10,
   },
   categoryCard: {
-    width: '20%',
+    width: '22%',
     alignItems: 'center',
     marginBottom: 10,
   },
   categoryImage: {
-    width: 80,
-    height: 80,
+    width: 60,
+    height: 60,
     borderRadius: 8,
     marginBottom: 5,
   },
   categoryName: {
-    fontSize: 14,
+    fontSize: 12,
     textAlign: 'center',
     color: '#666',
     flexWrap: 'wrap',
   },
   bannerContainer: {
     marginVertical: 20,
+    position: 'relative',
   },
   bannerImage: {
     width: '100%',
     height: 150,
     borderRadius: 8,
+  },
+  bannerOverlay: {
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    right: 0,
+    backgroundColor: 'rgba(0, 0, 0, 0.6)',
+    padding: 10,
+  },
+  bannerTitle: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: '#fff',
+  },
+  bannerSubtitle: {
+    fontSize: 12,
+    color: '#fff',
+    marginTop: 4,
   },
   dealsList: {
     paddingVertical: 10,
@@ -347,6 +421,21 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: '#5ac268',
     marginVertical: 5,
+  },
+  tagBadge: {
+    backgroundColor: '#ffebee',
+    paddingVertical: 4,
+    paddingHorizontal: 8,
+    borderRadius: 12,
+    marginBottom: 8,
+  },
+  suggestedTag: {
+    backgroundColor: '#e8f5e9',
+  },
+  tagText: {
+    fontSize: 10,
+    color: '#333',
+    fontWeight: 'bold',
   },
   addToCartButton: {
     backgroundColor: '#5ac268',
