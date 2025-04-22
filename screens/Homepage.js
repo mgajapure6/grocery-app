@@ -8,12 +8,12 @@ import {
   ScrollView,
   Image,
   FlatList,
-  Platform,
+  Platform
 } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { Feather } from '@expo/vector-icons';
 import { CartContext } from '../contexts/CartContext';
 import { addresses, categories, banner, suggestedItems, bestDealItems } from '../data/staticData';
-
 
 export default function Homepage({ navigation }) {
   const { cart, addToCart } = useContext(CartContext);
@@ -69,214 +69,243 @@ export default function Homepage({ navigation }) {
   );
 
   return (
-    <View style={styles.container}>
-      {/* Status Bar */}
-      <View style={styles.statusBar}>
-        <TouchableOpacity
-          style={styles.addressContainer}
-          onPress={() => console.log('Select address')}
-        >
-          <Feather name="map-pin" size={20} color="#5ac268" />
-          <Text style={styles.addressText} numberOfLines={1}>
-            {selectedAddress.title}: {selectedAddress.address}
-          </Text>
-          <Feather name="chevron-down" size={20} color="#666" />
-        </TouchableOpacity>
-        <TouchableOpacity
-          style={styles.cartContainer}
-          onPress={() => navigation.navigate('Cart')}
-        >
-          <Feather name="shopping-cart" size={24} color="#5ac268" />
-          <View style={styles.cartBadge}>
-            <Text style={styles.cartBadgeText}>{cart.length}</Text>
-          </View>
-        </TouchableOpacity>
-      </View>
+    <SafeAreaView style={styles.safeArea} edges={[ 'left', 'right']}>
+      <View style={styles.container}>
+        {/* Status Bar */}
+        <View style={styles.statusBar}>
+          <TouchableOpacity
+            style={styles.addressContainer}
+            onPress={() => console.log('Select address')}
+          >
+            <Feather name="map-pin" size={20} color="#5ac268" style={styles.addressIcon} />
+            <Text style={styles.addressText} numberOfLines={1}>
+              {selectedAddress.title}: {selectedAddress.address}
+            </Text>
+            <Feather name="chevron-down" size={20} color="#666" />
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={styles.cartContainer}
+            onPress={() => navigation.navigate('Cart')}
+          >
+            <Feather name="shopping-cart" size={24} color="#5ac268" />
+            <View style={styles.cartBadge}>
+              <Text style={styles.cartBadgeText}>{cart.length}</Text>
+            </View>
+          </TouchableOpacity>
+        </View>
 
-      {/* Main Content */}
-      <ScrollView contentContainerStyle={styles.scrollContent}>
-        {/* Search Bar and Filter */}
-        <View style={styles.searchContainer}>
-          <View style={styles.searchBar}>
-            <Feather name="search" size={20} color="#666" style={styles.searchIcon} />
-            <TextInput
-              style={styles.searchInput}
-              placeholder="Search for items..."
-              placeholderTextColor="#bbb"
+        {/* Main Content */}
+        <ScrollView contentContainerStyle={styles.scrollContent}>
+          {/* Search Bar and Filter */}
+          <View style={styles.searchContainer}>
+            <View style={styles.searchBar}>
+              <Feather name="search" size={20} color="#666" style={styles.searchIcon} />
+              <TextInput
+                style={styles.searchInput}
+                placeholder="Search for items..."
+                placeholderTextColor="#bbb"
+              />
+            </View>
+            <TouchableOpacity
+              style={styles.filterButton}
+              onPress={() => console.log('Filter pressed')}
+            >
+              <Feather name="filter" size={24} color="#5ac268" />
+            </TouchableOpacity>
+          </View>
+
+          {/* Shop By Categories */}
+          <View style={styles.sectionContainer}>
+            <View style={styles.sectionHeader}>
+              <Feather name="grid" size={20} color="#333" style={styles.sectionIcon} />
+              <Text style={styles.sectionTitle}>Shop By Categories</Text>
+              <TouchableOpacity onPress={() => navigation.navigate('Categories')}>
+                <Text style={styles.seeAllText}>See All</Text>
+              </TouchableOpacity>
+            </View>
+            <FlatList
+              data={categories.homepage}
+              renderItem={renderCategoryItem}
+              keyExtractor={(item) => item.id.toString()}
+              numColumns={4}
+              columnWrapperStyle={styles.categoryRow}
+              scrollEnabled={false}
             />
           </View>
-          <TouchableOpacity
-            style={styles.filterButton}
-            onPress={() => console.log('Filter pressed')}
-          >
-            <Feather name="filter" size={24} color="#5ac268" />
-          </TouchableOpacity>
-        </View>
 
-        {/* Shop By Categories */}
-        <View style={styles.sectionHeader}>
-          <Text style={styles.sectionTitle}>Shop By Categories</Text>
-          <TouchableOpacity onPress={() => navigation.navigate('Categories')}>
-            <Text style={styles.seeAllText}>See All</Text>
-          </TouchableOpacity>
-        </View>
-        <FlatList
-          data={categories.homepage}
-          renderItem={renderCategoryItem}
-          keyExtractor={(item) => item.id}
-          numColumns={4}
-          columnWrapperStyle={styles.categoryRow}
-          scrollEnabled={false}
-        />
-
-        {/* Banner */}
-        <View style={styles.bannerContainer}>
-          <Image source={banner.image} style={styles.bannerImage} />
-          <View style={styles.bannerOverlay}>
-            <Text style={styles.bannerTitle}>{banner.title}</Text>
-            <Text style={styles.bannerSubtitle}>{banner.subtitle}</Text>
+          {/* Banner */}
+          <View style={styles.bannerContainer}>
+            <Image source={banner.image} style={styles.bannerImage} />
+            <View style={styles.bannerOverlay}>
+              <Text style={styles.bannerTitle}>{banner.title}</Text>
+              <Text style={styles.bannerSubtitle}>{banner.subtitle}</Text>
+            </View>
           </View>
-        </View>
 
-        {/* Suggested Items */}
-        <View style={styles.sectionHeader}>
-          <Text style={styles.sectionTitle}>Suggested for You</Text>
-          <TouchableOpacity onPress={() => console.log('See All Suggested')}>
-            <Text style={styles.seeAllText}>See All</Text>
+          {/* Suggested Items */}
+          <View style={styles.sectionContainer}>
+            <View style={styles.sectionHeader}>
+              <Feather name="star" size={20} color="#333" style={styles.sectionIcon} />
+              <Text style={styles.sectionTitle}>Suggested for You</Text>
+              <TouchableOpacity onPress={() => console.log('See All Suggested')}>
+                <Text style={styles.seeAllText}>See All</Text>
+              </TouchableOpacity>
+            </View>
+            <FlatList
+              data={suggestedItems}
+              renderItem={renderSuggestedItem}
+              keyExtractor={(item) => item.id.toString()}
+              horizontal
+              showsHorizontalScrollIndicator={false}
+              contentContainerStyle={styles.dealsList}
+            />
+          </View>
+
+          {/* Best Deals */}
+          <View style={styles.sectionContainer}>
+            <View style={styles.sectionHeader}>
+              <Feather name="tag" size={20} color="#333" style={styles.sectionIcon} />
+              <Text style={styles.sectionTitle}>Best Deals</Text>
+              <TouchableOpacity onPress={() => console.log('See All Deals')}>
+                <Text style={styles.seeAllText}>See All</Text>
+              </TouchableOpacity>
+            </View>
+            <FlatList
+              data={bestDealItems}
+              renderItem={renderBestDealItem}
+              keyExtractor={(item) => item.id.toString()}
+              horizontal
+              showsHorizontalScrollIndicator={false}
+              contentContainerStyle={styles.dealsList}
+            />
+          </View>
+        </ScrollView>
+
+        {/* Bottom Navigation */}
+        <View style={styles.bottomNav}>
+          <TouchableOpacity
+            style={styles.navItem}
+            onPress={() => setActiveTab('Home')}
+          >
+            <Feather
+              name="home"
+              size={24}
+              color={activeTab === 'Home' ? '#5ac268' : '#666'}
+            />
+            <Text
+              style={[styles.navText, activeTab === 'Home' && styles.navTextActive]}
+            >
+              Home
+            </Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={styles.navItem}
+            onPress={() => {
+              setActiveTab('Favorite');
+              console.log('Favorite pressed');
+            }}
+          >
+            <Feather
+              name="heart"
+              size={24}
+              color={activeTab === 'Favorite' ? '#5ac268' : '#666'}
+            />
+            <Text
+              style={[
+                styles.navText,
+                activeTab === 'Favorite' && styles.navTextActive,
+              ]}
+            >
+              Favorite
+            </Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={styles.navItem}
+            onPress={() => {
+              setActiveTab('Categories');
+              navigation.navigate('Categories');
+            }}
+          >
+            <Feather
+              name="grid"
+              size={24}
+              color={activeTab === 'Categories' ? '#5ac268' : '#666'}
+            />
+            <Text
+              style={[
+                styles.navText,
+                activeTab === 'Categories' && styles.navTextActive,
+              ]}
+            >
+              Categories
+            </Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={styles.navItem}
+            onPress={() => {
+              setActiveTab('User');
+              console.log('User pressed');
+            }}
+          >
+            <Feather
+              name="user"
+              size={24}
+              color={activeTab === 'User' ? '#5ac268' : '#666'}
+            />
+            <Text
+              style={[styles.navText, activeTab === 'User' && styles.navTextActive]}
+            >
+              User
+            </Text>
           </TouchableOpacity>
         </View>
-        <FlatList
-          data={suggestedItems}
-          renderItem={renderSuggestedItem}
-          keyExtractor={(item) => item.id}
-          horizontal
-          showsHorizontalScrollIndicator={false}
-          contentContainerStyle={styles.dealsList}
-        />
-
-        {/* Best Deals */}
-        <View style={styles.sectionHeader}>
-          <Text style={styles.sectionTitle}>Best Deals</Text>
-          <TouchableOpacity onPress={() => console.log('See All Deals')}>
-            <Text style={styles.seeAllText}>See All</Text>
-          </TouchableOpacity>
-        </View>
-        <FlatList
-          data={bestDealItems}
-          renderItem={renderBestDealItem}
-          keyExtractor={(item) => item.id}
-          horizontal
-          showsHorizontalScrollIndicator={false}
-          contentContainerStyle={styles.dealsList}
-        />
-      </ScrollView>
-
-      {/* Bottom Navigation */}
-      <View style={styles.bottomNav}>
-        <TouchableOpacity
-          style={styles.navItem}
-          onPress={() => setActiveTab('Home')}
-        >
-          <Feather
-            name="home"
-            size={24}
-            color={activeTab === 'Home' ? '#5ac268' : '#666'}
-          />
-          <Text
-            style={[styles.navText, activeTab === 'Home' && styles.navTextActive]}
-          >
-            Home
-          </Text>
-        </TouchableOpacity>
-        <TouchableOpacity
-          style={styles.navItem}
-          onPress={() => {
-            setActiveTab('Favorite');
-            console.log('Favorite pressed');
-          }}
-        >
-          <Feather
-            name="heart"
-            size={24}
-            color={activeTab === 'Favorite' ? '#5ac268' : '#666'}
-          />
-          <Text
-            style={[
-              styles.navText,
-              activeTab === 'Favorite' && styles.navTextActive,
-            ]}
-          >
-            Favorite
-          </Text>
-        </TouchableOpacity>
-        <TouchableOpacity
-          style={styles.navItem}
-          onPress={() => {
-            setActiveTab('Categories');
-            navigation.navigate('Categories');
-          }}
-        >
-          <Feather
-            name="grid"
-            size={24}
-            color={activeTab === 'Categories' ? '#5ac268' : '#666'}
-          />
-          <Text
-            style={[
-              styles.navText,
-              activeTab === 'Categories' && styles.navTextActive,
-            ]}
-          >
-            Categories
-          </Text>
-        </TouchableOpacity>
-        <TouchableOpacity
-          style={styles.navItem}
-          onPress={() => {
-            setActiveTab('User');
-            console.log('User pressed');
-          }}
-        >
-          <Feather
-            name="user"
-            size={24}
-            color={activeTab === 'User' ? '#5ac268' : '#666'}
-          />
-          <Text
-            style={[styles.navText, activeTab === 'User' && styles.navTextActive]}
-          >
-            User
-          </Text>
-        </TouchableOpacity>
       </View>
-    </View>
+    </SafeAreaView>
+
   );
 }
 
 const styles = StyleSheet.create({
+  safeArea: {
+    flex: 1,
+    backgroundColor: '#fff', // Match statusBar background
+  },
   container: {
     flex: 1,
-    backgroundColor: '#fff',
+    backgroundColor: '#f5f5f5',
   },
   statusBar: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    padding: 15,
+    paddingHorizontal: 20,
+    paddingVertical: 15,
+    backgroundColor: '#f5f5f5',
     borderBottomWidth: 1,
     borderBottomColor: '#ddd',
-    backgroundColor: '#fff',
-    marginTop: Platform.OS === 'ios' ? 50 : 30,
+    marginTop: 40
   },
   addressContainer: {
     flexDirection: 'row',
     alignItems: 'center',
     flex: 1,
-    marginRight: 10,
+    marginRight: 15,
+    backgroundColor: '#f9f9f9',
+    borderRadius: 12,
+    padding: 10,
+    elevation: 2,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.1,
+    shadowRadius: 2,
+  },
+  addressIcon: {
+    marginRight: 8,
   },
   addressText: {
     fontSize: 16,
-    color: '#666',
+    fontWeight: '600',
+    color: '#333',
     marginHorizontal: 8,
     flex: 1,
   },
@@ -300,7 +329,8 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
   },
   scrollContent: {
-    padding: 15,
+    padding: 20,
+    paddingBottom: 100
   },
   searchContainer: {
     flexDirection: 'row',
@@ -313,10 +343,15 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     borderWidth: 1,
     borderColor: '#ddd',
-    borderRadius: 8,
+    borderRadius: 12,
     paddingHorizontal: 12,
     height: 50,
-    backgroundColor: '#f9f9f9',
+    backgroundColor: '#fff',
+    elevation: 2,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.1,
+    shadowRadius: 2,
   },
   searchIcon: {
     marginRight: 8,
@@ -324,11 +359,30 @@ const styles = StyleSheet.create({
   searchInput: {
     flex: 1,
     fontSize: 16,
+    fontWeight: '500',
     color: '#333',
   },
   filterButton: {
     marginLeft: 10,
-    padding: 10,
+    padding: 12,
+    backgroundColor: '#fff',
+    borderRadius: 12,
+    elevation: 2,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.1,
+    shadowRadius: 2,
+  },
+  sectionContainer: {
+    marginBottom: 20,
+    backgroundColor: '#fff',
+    borderRadius: 12,
+    padding: 15,
+    elevation: 3,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
   },
   sectionHeader: {
     flexDirection: 'row',
@@ -336,15 +390,18 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginBottom: 15,
   },
+  sectionIcon: {
+    marginRight: 8,
+  },
   sectionTitle: {
     fontSize: 20,
-    fontWeight: 'bold',
+    fontWeight: '700',
     color: '#333',
   },
   seeAllText: {
     fontSize: 16,
-    color: '#5ac268',
     fontWeight: '600',
+    color: '#5ac268',
   },
   categoryRow: {
     justifyContent: 'space-between',
@@ -352,63 +409,81 @@ const styles = StyleSheet.create({
   },
   categoryCard: {
     width: '22%',
+    backgroundColor: '#fff',
+    borderRadius: 12,
     alignItems: 'center',
     marginBottom: 10,
+
   },
   categoryImage: {
     width: 60,
     height: 60,
-    borderRadius: 8,
-    marginBottom: 5,
+    borderRadius: 10,
+    marginBottom: 8,
   },
   categoryName: {
     fontSize: 12,
+    fontWeight: '600',
     textAlign: 'center',
-    color: '#666',
+    color: '#333',
     flexWrap: 'wrap',
   },
   bannerContainer: {
     marginVertical: 20,
-    position: 'relative',
+    borderRadius: 12,
+    overflow: 'hidden',
+    elevation: 3,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
   },
   bannerImage: {
     width: '100%',
     height: 150,
-    borderRadius: 8,
+    borderRadius: 12,
   },
   bannerOverlay: {
     position: 'absolute',
     bottom: 0,
     left: 0,
     right: 0,
-    backgroundColor: 'rgba(0, 0, 0, 0.6)',
-    padding: 10,
+    backgroundColor: 'rgba(0, 0, 0, 0.7)',
+    padding: 15,
+    borderBottomLeftRadius: 12,
+    borderBottomRightRadius: 12,
   },
   bannerTitle: {
-    fontSize: 16,
-    fontWeight: 'bold',
+    fontSize: 18,
+    fontWeight: '700',
     color: '#fff',
   },
   bannerSubtitle: {
-    fontSize: 12,
+    fontSize: 14,
+    fontWeight: '500',
     color: '#fff',
-    marginTop: 4,
+    marginTop: 6,
   },
   dealsList: {
     paddingVertical: 10,
   },
   dealCard: {
-    width: 150,
+    width: 160,
     marginRight: 15,
-    backgroundColor: '#f9f9f9',
-    borderRadius: 8,
-    padding: 10,
+    backgroundColor: '#fff',
+    borderRadius: 12,
+    padding: 12,
     alignItems: 'center',
+    elevation: 2,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.1,
+    shadowRadius: 2,
   },
   dealImage: {
     width: 100,
     height: 100,
-    borderRadius: 8,
+    borderRadius: 10,
     marginBottom: 10,
   },
   dealName: {
@@ -419,8 +494,9 @@ const styles = StyleSheet.create({
   },
   dealPrice: {
     fontSize: 14,
+    fontWeight: '500',
     color: '#5ac268',
-    marginVertical: 5,
+    marginVertical: 6,
   },
   tagBadge: {
     backgroundColor: '#ffebee',
@@ -430,18 +506,18 @@ const styles = StyleSheet.create({
     marginBottom: 8,
   },
   suggestedTag: {
-    backgroundColor: '#e8f5e9',
+    backgroundColor: '#e6f4ea',
   },
   tagText: {
     fontSize: 10,
+    fontWeight: '600',
     color: '#333',
-    fontWeight: 'bold',
   },
   addToCartButton: {
     backgroundColor: '#5ac268',
     paddingVertical: 8,
     paddingHorizontal: 12,
-    borderRadius: 5,
+    borderRadius: 8,
   },
   addToCartText: {
     color: '#fff',
@@ -452,10 +528,15 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-around',
     alignItems: 'center',
-    paddingVertical: 10,
+    paddingVertical: 12,
     borderTopWidth: 1,
     borderTopColor: '#ddd',
     backgroundColor: '#fff',
+    elevation: 4,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: -2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
     ...Platform.select({
       ios: {
         paddingBottom: 20,
@@ -467,6 +548,7 @@ const styles = StyleSheet.create({
   },
   navText: {
     fontSize: 12,
+    fontWeight: '500',
     color: '#666',
     marginTop: 5,
   },

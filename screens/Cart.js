@@ -10,6 +10,7 @@ import {
   Platform,
   Modal,
 } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { Feather } from '@expo/vector-icons';
 import { CartContext } from '../contexts/CartContext';
 import { suggestedItems, tipOptions, addresses, paymentMethods, coupons } from '../data/staticData';
@@ -289,368 +290,375 @@ export default function Cart({ navigation }) {
   );
 
   return (
-    <View style={styles.container}>
-      <View style={styles.header}>
-        <TouchableOpacity onPress={() => navigation.goBack()}>
-          <Feather name="arrow-left" size={24} color="#333" />
-        </TouchableOpacity>
-        <Text style={styles.headerTitle}>Your Cart</Text>
-        <TouchableOpacity style={styles.cartContainer} onPress={() => console.log('Cart icon pressed')}>
-          <Feather name="shopping-cart" size={24} color="#5ac268" />
-          <View style={styles.cartBadge}>
-            <Text style={styles.cartBadgeText}>{validCart.length}</Text>
-          </View>
-        </TouchableOpacity>
-      </View>
-
-      <ScrollView contentContainerStyle={styles.scrollContent}>
-        <View style={styles.sectionContainer}>
-          <View style={styles.deliveryTime}>
-            <Feather name="clock" size={20} color="#5ac268" style={styles.sectionIcon} />
-            <Text style={styles.deliveryText}>Estimated Delivery: 30-45 mins</Text>
-          </View>
-        </View>
-
-        <View style={styles.sectionContainer}>
-          <View style={styles.sectionHeader}>
-            <Feather name="shopping-cart" size={20} color="#333" style={styles.sectionIcon} />
-            <Text style={styles.sectionTitle}>Cart Items</Text>
-          </View>
-          <FlatList
-            data={validCart}
-            renderItem={renderCartItem}
-            keyExtractor={(item, index) => item.id ? `${item.id}` : `cart-${index}`}
-            scrollEnabled={false}
-            ListEmptyComponent={renderEmptyCart}
-          />
-        </View>
-
-        <View style={styles.sectionContainer}>
-          <View style={styles.sectionHeader}>
-            <Feather name="tag" size={20} color="#333" style={styles.sectionIcon} />
-            <Text style={styles.sectionTitle}>Coupon</Text>
-          </View>
-          <TouchableOpacity
-            style={styles.selectCouponButton}
-            onPress={() => setCouponModalVisible(true)}
-          >
-            <Text style={styles.selectCouponText}>
-              {selectedCoupon ? selectedCoupon.code : 'Select Coupon'}
-            </Text>
-            <Feather name="chevron-right" size={20} color="#007bff" />
+    <SafeAreaView style={styles.safeArea} edges={['left', 'right']}>
+      <View style={styles.container}>
+        <View style={styles.header}>
+          <TouchableOpacity onPress={() => navigation.goBack()}>
+            <Feather name="arrow-left" size={24} color="#333" />
+          </TouchableOpacity>
+          <Text style={styles.headerTitle}>Your Cart</Text>
+          <TouchableOpacity style={styles.cartContainer} onPress={() => console.log('Cart icon pressed')}>
+            <Feather name="shopping-cart" size={24} color="#5ac268" />
+            <View style={styles.cartBadge}>
+              <Text style={styles.cartBadgeText}>{validCart.length}</Text>
+            </View>
           </TouchableOpacity>
         </View>
 
-        {selectedCoupon && (
-          <View style={styles.selectedCouponContainer}>
-            <View style={styles.couponCard}>
-              <View style={styles.couponDetails}>
-                <Text style={styles.couponCode}>{selectedCoupon.code}</Text>
-                <Text style={styles.couponDescription}>{selectedCoupon.description}</Text>
-                <Text style={styles.couponDiscount}>Saved ${selectedCoupon.discount.toFixed(2)}</Text>
-              </View>
-              <TouchableOpacity onPress={removeCoupon}>
-                <Feather name="x-circle" size={20} color="#ff3b30" />
-              </TouchableOpacity>
+        <ScrollView contentContainerStyle={styles.scrollContent}>
+          <View style={styles.sectionContainer}>
+            <View style={styles.deliveryTime}>
+              <Feather name="clock" size={20} color="#5ac268" style={styles.sectionIcon} />
+              <Text style={styles.deliveryText}>Estimated Delivery: 30-45 mins</Text>
             </View>
           </View>
-        )}
 
-        <View style={styles.sectionContainer}>
-          <View style={styles.sectionHeader}>
-            <Feather name="star" size={20} color="#333" style={styles.sectionIcon} />
-            <Text style={styles.sectionTitle}>You Might Like</Text>
-          </View>
-          <FlatList
-            data={validSuggestedItems}
-            renderItem={renderSuggestedItem}
-            keyExtractor={(item, index) => item.id ? `${item.id}` : `suggested-${index}`}
-            horizontal
-            showsHorizontalScrollIndicator={false}
-            contentContainerStyle={styles.suggestedList}
-            ListEmptyComponent={<Text style={styles.emptyText}>No suggested items available</Text>}
-          />
-        </View>
-
-        <View style={styles.sectionContainer}>
-          <View style={styles.sectionHeader}>
-            <Feather name="dollar-sign" size={20} color="#333" style={styles.sectionIcon} />
-            <Text style={styles.sectionTitle}>Bill Details</Text>
-          </View>
-          <View style={styles.billContainer}>
-            <View style={styles.billRow}>
-              <Text style={styles.billLabel}>Subtotal</Text>
-              <Text style={styles.billValue}>${subtotal.toFixed(2)}</Text>
-            </View>
-            <View style={styles.billRow}>
-              <Text style={styles.billLabel}>GST (5%)</Text>
-              <Text style={styles.billValue}>${gst.toFixed(2)}</Text>
-            </View>
-            <View style={styles.billRow}>
-              <Text style={styles.billLabel}>Handling Charge</Text>
-              <Text style={styles.billValue}>${handlingCharge.toFixed(2)}</Text>
-            </View>
-            <View style={styles.billRow}>
-              <Text style={styles.billLabel}>Delivery Charge</Text>
-              <Text style={styles.billValue}>${deliveryCharge.toFixed(2)}</Text>
-            </View>
-            {selectedCoupon && (
-              <View style={styles.billRow}>
-                <Text style={styles.billLabel}>Coupon Discount</Text>
-                <Text style={[styles.billValue, styles.discount]}>-${couponDiscount.toFixed(2)}</Text>
-              </View>
-            )}
-            <View style={styles.billRow}>
-              <Text style={styles.billLabel}>Tip</Text>
-              <Text style={styles.billValue}>${selectedTip.toFixed(2)}</Text>
-            </View>
-            <View style={[styles.billRow, styles.grandTotal]}>
-              <Text style={styles.billLabel}>Grand Total</Text>
-              <Text style={styles.billValue}>${grandTotal.toFixed(2)}</Text>
-            </View>
-          </View>
-        </View>
-
-        <View style={styles.sectionContainer}>
-          <View style={styles.sectionHeader}>
-            <Feather name="heart" size={20} color="#333" style={styles.sectionIcon} />
-            <Text style={styles.sectionTitle}>Tip Your Delivery Partner</Text>
-          </View>
-          <View style={styles.tipOptions}>
-            {validTipOptions.map((tip, index) => (
-              <TouchableOpacity
-                key={`tip-${index}`}
-                style={[styles.tipButton, selectedTip === tip && styles.tipButtonSelected]}
-                onPress={() => {
-                  setSelectedTip(tip);
-                  console.log(`Tip selected: $${tip}`);
-                }}
-              >
-                <Text style={[styles.tipText, selectedTip === tip && styles.tipTextSelected]}>
-                  ${tip.toFixed(2)}
-                </Text>
-              </TouchableOpacity>
-            ))}
-          </View>
-        </View>
-
-        {selectedAddress && (
           <View style={styles.sectionContainer}>
             <View style={styles.sectionHeader}>
-              <Feather name="map-pin" size={20} color="#333" style={styles.sectionIcon} />
-              <Text style={styles.sectionTitle}>Delivery Address</Text>
+              <Feather name="shopping-cart" size={20} color="#333" style={styles.sectionIcon} />
+              <Text style={styles.sectionTitle}>Cart Items</Text>
             </View>
-            <View style={styles.addressCard}>
-              <Feather name="map-pin" size={20} color="#5ac268" style={styles.addressIcon} />
-              <View style={styles.addressDetails}>
-                <Text style={styles.addressName}>{selectedAddress.title}</Text>
-                <Text style={styles.addressText}>{selectedAddress.address}</Text>
-                {selectedAddress.isDefault && <Text style={styles.defaultBadge}>Default</Text>}
-              </View>
-              <TouchableOpacity
-                style={styles.changeButton}
-                onPress={() => setAddressModalVisible(true)}
-              >
-                <Text style={styles.changeButtonText}>Change</Text>
-              </TouchableOpacity>
-            </View>
+            <FlatList
+              data={validCart}
+              renderItem={renderCartItem}
+              keyExtractor={(item, index) => item.id ? `${item.id}` : `cart-${index}`}
+              scrollEnabled={false}
+              ListEmptyComponent={renderEmptyCart}
+            />
           </View>
-        )}
 
-        {selectedPaymentMethod && (
           <View style={styles.sectionContainer}>
             <View style={styles.sectionHeader}>
-              <Feather name="credit-card" size={20} color="#333" style={styles.sectionIcon} />
-              <Text style={styles.sectionTitle}>Payment Method</Text>
+              <Feather name="tag" size={20} color="#333" style={styles.sectionIcon} />
+              <Text style={styles.sectionTitle}>Coupon</Text>
             </View>
-            <View style={styles.paymentCard}>
-              <Image source={selectedPaymentMethod.logo} style={styles.paymentLogo} />
-              <View style={styles.paymentDetails}>
-                <Text style={styles.paymentName}>{selectedPaymentMethod.details}</Text>
-                {selectedPaymentMethod.isDefault && <Text style={styles.defaultBadge}>Default</Text>}
-              </View>
-              <TouchableOpacity
-                style={styles.changeButton}
-                onPress={() => setPaymentModalVisible(true)}
-              >
-                <Text style={styles.changeButtonText}>Change</Text>
-              </TouchableOpacity>
-            </View>
-          </View>
-        )}
-
-        <View style={styles.actionButtonsContainer}>
-          <View
-            style={[styles.proceedButton, (!selectedAddress || !selectedPaymentMethod) && styles.proceedButtonDisabled, { backgroundColor: '#5ac268' }]}
-          >
             <TouchableOpacity
-              onPress={() => {
-                if (!selectedAddress) {
-                  setAddressModalVisible(true);
-                  console.log('No address selected, opening address modal');
-                } else if (!selectedPaymentMethod) {
-                  setPaymentModalVisible(true);
-                  console.log('No payment method selected, opening payment modal');
-                } else {
-                  console.log('Proceeding with order:', { address: selectedAddress, payment: selectedPaymentMethod, coupon: selectedCoupon });
-                }
-              }}
-              disabled={!selectedAddress || !selectedPaymentMethod}
+              style={styles.selectCouponButton}
+              onPress={() => setCouponModalVisible(true)}
             >
-              <Text style={styles.proceedButtonText}>Proceed to Checkout</Text>
+              <Text style={styles.selectCouponText}>
+                {selectedCoupon ? selectedCoupon.code : 'Select Coupon'}
+              </Text>
+              <Feather name="chevron-right" size={20} color="#007bff" />
             </TouchableOpacity>
           </View>
-        </View>
-      </ScrollView>
 
-      <Modal
-        animationType="slide"
-        transparent={true}
-        visible={isAddressModalVisible}
-        onRequestClose={() => setAddressModalVisible(false)}
-      >
-        <View style={styles.modalOverlay}>
-          <View style={styles.modalContent}>
-            <View style={styles.modalHeader}>
-              <Text style={styles.modalTitle}>Select Delivery Address</Text>
-              <TouchableOpacity onPress={() => setAddressModalVisible(false)}>
-                <Feather name="x" size={24} color="#333" />
-              </TouchableOpacity>
+          {selectedCoupon && (
+            <View style={styles.selectedCouponContainer}>
+              <View style={styles.couponCard}>
+                <View style={styles.couponDetails}>
+                  <Text style={styles.couponCode}>{selectedCoupon.code}</Text>
+                  <Text style={styles.couponDescription}>{selectedCoupon.description}</Text>
+                  <Text style={styles.couponDiscount}>Saved ${selectedCoupon.discount.toFixed(2)}</Text>
+                </View>
+                <TouchableOpacity onPress={removeCoupon}>
+                  <Feather name="x-circle" size={20} color="#ff3b30" />
+                </TouchableOpacity>
+              </View>
+            </View>
+          )}
+
+          <View style={styles.sectionContainer}>
+            <View style={styles.sectionHeader}>
+              <Feather name="star" size={20} color="#333" style={styles.sectionIcon} />
+              <Text style={styles.sectionTitle}>You Might Like</Text>
             </View>
             <FlatList
-              data={savedAddresses}
-              renderItem={renderAddressItem}
-              keyExtractor={(item, index) => item.id ? `${item.id}` : `address-${index}`}
-              ListEmptyComponent={<Text style={styles.emptyText}>No addresses saved</Text>}
-              contentContainerStyle={styles.addressList}
+              data={validSuggestedItems}
+              renderItem={renderSuggestedItem}
+              keyExtractor={(item, index) => item.id ? `${item.id}` : `suggested-${index}`}
+              horizontal
+              showsHorizontalScrollIndicator={false}
+              contentContainerStyle={styles.suggestedList}
+              ListEmptyComponent={<Text style={styles.emptyText}>No suggested items available</Text>}
             />
-            <View style={[styles.addAddressButton, { backgroundColor: '#5ac268' }]}>
-              <TouchableOpacity onPress={addNewAddress}>
-                <Text style={styles.addAddressButtonText}>Add New Address</Text>
+          </View>
+
+          <View style={styles.sectionContainer}>
+            <View style={styles.sectionHeader}>
+              <Feather name="dollar-sign" size={20} color="#333" style={styles.sectionIcon} />
+              <Text style={styles.sectionTitle}>Bill Details</Text>
+            </View>
+            <View style={styles.billContainer}>
+              <View style={styles.billRow}>
+                <Text style={styles.billLabel}>Subtotal</Text>
+                <Text style={styles.billValue}>${subtotal.toFixed(2)}</Text>
+              </View>
+              <View style={styles.billRow}>
+                <Text style={styles.billLabel}>GST (5%)</Text>
+                <Text style={styles.billValue}>${gst.toFixed(2)}</Text>
+              </View>
+              <View style={styles.billRow}>
+                <Text style={styles.billLabel}>Handling Charge</Text>
+                <Text style={styles.billValue}>${handlingCharge.toFixed(2)}</Text>
+              </View>
+              <View style={styles.billRow}>
+                <Text style={styles.billLabel}>Delivery Charge</Text>
+                <Text style={styles.billValue}>${deliveryCharge.toFixed(2)}</Text>
+              </View>
+              {selectedCoupon && (
+                <View style={styles.billRow}>
+                  <Text style={styles.billLabel}>Coupon Discount</Text>
+                  <Text style={[styles.billValue, styles.discount]}>-${couponDiscount.toFixed(2)}</Text>
+                </View>
+              )}
+              <View style={styles.billRow}>
+                <Text style={styles.billLabel}>Tip</Text>
+                <Text style={styles.billValue}>${selectedTip.toFixed(2)}</Text>
+              </View>
+              <View style={[styles.billRow, styles.grandTotal]}>
+                <Text style={styles.billLabel}>Grand Total</Text>
+                <Text style={styles.billValue}>${grandTotal.toFixed(2)}</Text>
+              </View>
+            </View>
+          </View>
+
+          <View style={styles.sectionContainer}>
+            <View style={styles.sectionHeader}>
+              <Feather name="heart" size={20} color="#333" style={styles.sectionIcon} />
+              <Text style={styles.sectionTitle}>Tip Your Delivery Partner</Text>
+            </View>
+            <View style={styles.tipOptions}>
+              {validTipOptions.map((tip, index) => (
+                <TouchableOpacity
+                  key={`tip-${index}`}
+                  style={[styles.tipButton, selectedTip === tip && styles.tipButtonSelected]}
+                  onPress={() => {
+                    setSelectedTip(tip);
+                    console.log(`Tip selected: $${tip}`);
+                  }}
+                >
+                  <Text style={[styles.tipText, selectedTip === tip && styles.tipTextSelected]}>
+                    ${tip.toFixed(2)}
+                  </Text>
+                </TouchableOpacity>
+              ))}
+            </View>
+          </View>
+
+          {selectedAddress && (
+            <View style={styles.sectionContainer}>
+              <View style={styles.sectionHeader}>
+                <Feather name="map-pin" size={20} color="#333" style={styles.sectionIcon} />
+                <Text style={styles.sectionTitle}>Delivery Address</Text>
+              </View>
+              <View style={styles.addressCard}>
+                <Feather name="map-pin" size={20} color="#5ac268" style={styles.addressIcon} />
+                <View style={styles.addressDetails}>
+                  <Text style={styles.addressName}>{selectedAddress.title}</Text>
+                  <Text style={styles.addressText}>{selectedAddress.address}</Text>
+                  {selectedAddress.isDefault && <Text style={styles.defaultBadge}>Default</Text>}
+                </View>
+                <TouchableOpacity
+                  style={styles.changeButton}
+                  onPress={() => setAddressModalVisible(true)}
+                >
+                  <Text style={styles.changeButtonText}>Change</Text>
+                </TouchableOpacity>
+              </View>
+            </View>
+          )}
+
+          {selectedPaymentMethod && (
+            <View style={styles.sectionContainer}>
+              <View style={styles.sectionHeader}>
+                <Feather name="credit-card" size={20} color="#333" style={styles.sectionIcon} />
+                <Text style={styles.sectionTitle}>Payment Method</Text>
+              </View>
+              <View style={styles.paymentCard}>
+                <Image source={selectedPaymentMethod.logo} style={styles.paymentLogo} />
+                <View style={styles.paymentDetails}>
+                  <Text style={styles.paymentName}>{selectedPaymentMethod.details}</Text>
+                  {selectedPaymentMethod.isDefault && <Text style={styles.defaultBadge}>Default</Text>}
+                </View>
+                <TouchableOpacity
+                  style={styles.changeButton}
+                  onPress={() => setPaymentModalVisible(true)}
+                >
+                  <Text style={styles.changeButtonText}>Change</Text>
+                </TouchableOpacity>
+              </View>
+            </View>
+          )}
+
+          <View style={styles.actionButtonsContainer}>
+            <View
+              style={[styles.proceedButton, (!selectedAddress || !selectedPaymentMethod) && styles.proceedButtonDisabled, { backgroundColor: '#5ac268' }]}
+            >
+              <TouchableOpacity
+                onPress={() => {
+                  if (!selectedAddress) {
+                    setAddressModalVisible(true);
+                    console.log('No address selected, opening address modal');
+                  } else if (!selectedPaymentMethod) {
+                    setPaymentModalVisible(true);
+                    console.log('No payment method selected, opening payment modal');
+                  } else {
+                    console.log('Proceeding with order:', { address: selectedAddress, payment: selectedPaymentMethod, coupon: selectedCoupon });
+                  }
+                }}
+                disabled={!selectedAddress || !selectedPaymentMethod}
+              >
+                <Text style={styles.proceedButtonText}>Proceed to Checkout</Text>
               </TouchableOpacity>
             </View>
           </View>
-        </View>
-      </Modal>
+        </ScrollView>
 
-      <Modal
-        animationType="slide"
-        transparent={true}
-        visible={isPaymentModalVisible}
-        onRequestClose={() => setPaymentModalVisible(false)}
-      >
-        <View style={styles.modalOverlay}>
-          <View style={styles.modalContent}>
-            <View style={styles.modalHeader}>
-              <Text style={styles.modalTitle}>Select Payment Method</Text>
-              <TouchableOpacity onPress={() => setPaymentModalVisible(false)}>
-                <Feather name="x" size={24} color="#333" />
-              </TouchableOpacity>
-            </View>
-            <FlatList
-              data={savedPaymentMethods}
-              renderItem={renderPaymentItem}
-              keyExtractor={(item, index) => item.id ? `${item.id}` : `payment-${index}`}
-              ListEmptyComponent={<Text style={styles.emptyText}>No payment methods saved</Text>}
-              contentContainerStyle={styles.paymentList}
-            />
-            <View style={[styles.addPaymentButton, { backgroundColor: '#5ac268' }]}>
-              <TouchableOpacity onPress={addNewPaymentMethod}>
-                <Text style={styles.addPaymentButtonText}>Add New Payment Method</Text>
-              </TouchableOpacity>
+        <Modal
+          animationType="slide"
+          transparent={true}
+          visible={isAddressModalVisible}
+          onRequestClose={() => setAddressModalVisible(false)}
+        >
+          <View style={styles.modalOverlay}>
+            <View style={styles.modalContent}>
+              <View style={styles.modalHeader}>
+                <Text style={styles.modalTitle}>Select Delivery Address</Text>
+                <TouchableOpacity onPress={() => setAddressModalVisible(false)}>
+                  <Feather name="x" size={24} color="#333" />
+                </TouchableOpacity>
+              </View>
+              <FlatList
+                data={savedAddresses}
+                renderItem={renderAddressItem}
+                keyExtractor={(item, index) => item.id ? `${item.id}` : `address-${index}`}
+                ListEmptyComponent={<Text style={styles.emptyText}>No addresses saved</Text>}
+                contentContainerStyle={styles.addressList}
+              />
+              <View style={[styles.addAddressButton, { backgroundColor: '#5ac268' }]}>
+                <TouchableOpacity onPress={addNewAddress}>
+                  <Text style={styles.addAddressButtonText}>Add New Address</Text>
+                </TouchableOpacity>
+              </View>
             </View>
           </View>
-        </View>
-      </Modal>
+        </Modal>
 
-      <Modal
-        animationType="slide"
-        transparent={true}
-        visible={isCouponModalVisible}
-        onRequestClose={() => setCouponModalVisible(false)}
-      >
-        <View style={styles.modalOverlay}>
-          <View style={styles.modalContent}>
-            <View style={styles.modalHeader}>
-              <Text style={styles.modalTitle}>Select Coupon</Text>
-              <TouchableOpacity onPress={() => setCouponModalVisible(false)}>
-                <Feather name="x" size={24} color="#333" />
-              </TouchableOpacity>
+        <Modal
+          animationType="slide"
+          transparent={true}
+          visible={isPaymentModalVisible}
+          onRequestClose={() => setPaymentModalVisible(false)}
+        >
+          <View style={styles.modalOverlay}>
+            <View style={styles.modalContent}>
+              <View style={styles.modalHeader}>
+                <Text style={styles.modalTitle}>Select Payment Method</Text>
+                <TouchableOpacity onPress={() => setPaymentModalVisible(false)}>
+                  <Feather name="x" size={24} color="#333" />
+                </TouchableOpacity>
+              </View>
+              <FlatList
+                data={savedPaymentMethods}
+                renderItem={renderPaymentItem}
+                keyExtractor={(item, index) => item.id ? `${item.id}` : `payment-${index}`}
+                ListEmptyComponent={<Text style={styles.emptyText}>No payment methods saved</Text>}
+                contentContainerStyle={styles.paymentList}
+              />
+              <View style={[styles.addPaymentButton, { backgroundColor: '#5ac268' }]}>
+                <TouchableOpacity onPress={addNewPaymentMethod}>
+                  <Text style={styles.addPaymentButtonText}>Add New Payment Method</Text>
+                </TouchableOpacity>
+              </View>
             </View>
-            <FlatList
-              data={validCoupons}
-              renderItem={renderCouponItem}
-              keyExtractor={(item, index) => item.id ? `${item.id}` : `coupon-${index}`}
-              ListEmptyComponent={<Text style={styles.emptyText}>No coupons available</Text>}
-              contentContainerStyle={styles.couponList}
-            />
           </View>
-        </View>
-      </Modal>
+        </Modal>
 
-      <View style={styles.bottomNav}>
-        <TouchableOpacity
-          style={styles.navItem}
-          onPress={() => {
-            setActiveTab('Home');
-            navigation.navigate('Homepage');
-          }}
+        <Modal
+          animationType="slide"
+          transparent={true}
+          visible={isCouponModalVisible}
+          onRequestClose={() => setCouponModalVisible(false)}
         >
-          <Feather
-            name="home"
-            size={24}
-            color={activeTab === 'Home' ? '#5ac268' : '#666'}
-          />
-          <Text style={[styles.navText, activeTab === 'Home' && styles.navTextActive]}>Home</Text>
-        </TouchableOpacity>
-        <TouchableOpacity
-          style={styles.navItem}
-          onPress={() => {
-            setActiveTab('Favorite');
-            console.log('Favorite pressed');
-          }}
-        >
-          <Feather
-            name="heart"
-            size={24}
-            color={activeTab === 'Favorite' ? '#5ac268' : '#666'}
-          />
-          <Text style={[styles.navText, activeTab === 'Favorite' && styles.navTextActive]}>Favorite</Text>
-        </TouchableOpacity>
-        <TouchableOpacity
-          style={styles.navItem}
-          onPress={() => {
-            setActiveTab('Categories');
-            navigation.navigate('Categories');
-          }}
-        >
-          <Feather
-            name="grid"
-            size={24}
-            color={activeTab === 'Categories' ? '#5ac268' : '#666'}
-          />
-          <Text style={[styles.navText, activeTab === 'Categories' && styles.navTextActive]}>Categories</Text>
-        </TouchableOpacity>
-        <TouchableOpacity
-          style={styles.navItem}
-          onPress={() => {
-            setActiveTab('User');
-            console.log('User pressed');
-          }}
-        >
-          <Feather
-            name="user"
-            size={24}
-            color={activeTab === 'User' ? '#5ac268' : '#666'}
-          />
-          <Text style={[styles.navText, activeTab === 'User' && styles.navTextActive]}>User</Text>
-        </TouchableOpacity>
+          <View style={styles.modalOverlay}>
+            <View style={styles.modalContent}>
+              <View style={styles.modalHeader}>
+                <Text style={styles.modalTitle}>Select Coupon</Text>
+                <TouchableOpacity onPress={() => setCouponModalVisible(false)}>
+                  <Feather name="x" size={24} color="#333" />
+                </TouchableOpacity>
+              </View>
+              <FlatList
+                data={validCoupons}
+                renderItem={renderCouponItem}
+                keyExtractor={(item, index) => item.id ? `${item.id}` : `coupon-${index}`}
+                ListEmptyComponent={<Text style={styles.emptyText}>No coupons available</Text>}
+                contentContainerStyle={styles.couponList}
+              />
+            </View>
+          </View>
+        </Modal>
+
+        <View style={styles.bottomNav}>
+          <TouchableOpacity
+            style={styles.navItem}
+            onPress={() => {
+              setActiveTab('Home');
+              navigation.navigate('Homepage');
+            }}
+          >
+            <Feather
+              name="home"
+              size={24}
+              color={activeTab === 'Home' ? '#5ac268' : '#666'}
+            />
+            <Text style={[styles.navText, activeTab === 'Home' && styles.navTextActive]}>Home</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={styles.navItem}
+            onPress={() => {
+              setActiveTab('Favorite');
+              console.log('Favorite pressed');
+            }}
+          >
+            <Feather
+              name="heart"
+              size={24}
+              color={activeTab === 'Favorite' ? '#5ac268' : '#666'}
+            />
+            <Text style={[styles.navText, activeTab === 'Favorite' && styles.navTextActive]}>Favorite</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={styles.navItem}
+            onPress={() => {
+              setActiveTab('Categories');
+              navigation.navigate('Categories');
+            }}
+          >
+            <Feather
+              name="grid"
+              size={24}
+              color={activeTab === 'Categories' ? '#5ac268' : '#666'}
+            />
+            <Text style={[styles.navText, activeTab === 'Categories' && styles.navTextActive]}>Categories</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={styles.navItem}
+            onPress={() => {
+              setActiveTab('User');
+              console.log('User pressed');
+            }}
+          >
+            <Feather
+              name="user"
+              size={24}
+              color={activeTab === 'User' ? '#5ac268' : '#666'}
+            />
+            <Text style={[styles.navText, activeTab === 'User' && styles.navTextActive]}>User</Text>
+          </TouchableOpacity>
+        </View>
       </View>
-    </View>
+    </SafeAreaView>
+
   );
 }
 
 const styles = StyleSheet.create({
+  safeArea: {
+    flex: 1,
+    backgroundColor: '#fff', // Match statusBar background
+  },
   container: {
     flex: 1,
     backgroundColor: '#f5f5f5',
@@ -659,16 +667,12 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    padding: 20,
+    paddingHorizontal: 20,
+    paddingVertical: 15,
+    backgroundColor: '#f5f5f5',
     borderBottomWidth: 1,
     borderBottomColor: '#ddd',
-    backgroundColor: '#fff',
-    elevation: 4,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    marginTop: Platform.OS === 'ios' ? 50 : 30,
+    marginTop: 40
   },
   headerTitle: {
     fontSize: 22,
