@@ -520,7 +520,7 @@ export default function Cart({ navigation }) {
             <FlatList
               data={savedAddresses}
               renderItem={renderAddressItem}
-              keyExtractor={(item) => item.id}
+              keyExtractor={(item, index) => item.id ? `${item.id}` : `address-${index}`}
               ListEmptyComponent={<Text style={styles.emptyText}>No addresses saved</Text>}
               contentContainerStyle={styles.addressList}
             />
@@ -550,7 +550,7 @@ export default function Cart({ navigation }) {
             <FlatList
               data={savedPaymentMethods}
               renderItem={renderPaymentItem}
-              keyExtractor={(item) => item.id}
+              keyExtractor={(item, index) => item.id ? `${item.id}` : `payment-${index}`}
               ListEmptyComponent={<Text style={styles.emptyText}>No payment methods saved</Text>}
               contentContainerStyle={styles.paymentList}
             />
@@ -580,7 +580,7 @@ export default function Cart({ navigation }) {
             <FlatList
               data={validCoupons}
               renderItem={renderCouponItem}
-              keyExtractor={(item) => item.id}
+              keyExtractor={(item, index) => item.id ? `${item.id}` : `coupon-${index}`}
               ListEmptyComponent={<Text style={styles.emptyText}>No coupons available</Text>}
               contentContainerStyle={styles.couponList}
             />
