@@ -12,6 +12,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { Feather } from '@expo/vector-icons';
 import { CartContext } from '../contexts/CartContext';
 import { categories } from '../data/staticData';
+import { FontAwesome } from '@expo/vector-icons'
 
 export default function CategoryItems({ navigation, route }) {
   const { addToCart, cart } = useContext(CartContext);
@@ -28,7 +29,7 @@ export default function CategoryItems({ navigation, route }) {
     groceryKitchen: 'Grocery & Kitchen',
     snacksDrinks: 'Snacks & Drinks',
     beautyPersonalCare: 'Beauty & Personal Care',
-    householdEssentials: 'Household Essentials',
+    householdEssentials: 'Household Essentials'
   }[mainCategory] || 'Categories';
 
   // Render subcategory in left column
@@ -75,7 +76,7 @@ export default function CategoryItems({ navigation, route }) {
   );
 
   return (
-    <SafeAreaView style={styles.safeArea} edges={['left', 'right']}>
+    <SafeAreaView style={styles.safeArea} edges={['top', 'left', 'right']}>
       <View style={styles.container}>
         {/* Status Bar */}
         <View style={styles.statusBar}>
@@ -114,14 +115,14 @@ export default function CategoryItems({ navigation, route }) {
                 style={styles.filterButton}
                 onPress={() => console.log('Filter pressed')}
               >
-                <Feather name="filter" size={20} color="#5ac268" />
+                <FontAwesome name='filter' size={15} color="#5ac268"/>
                 <Text style={styles.filterText}>Filter</Text>
               </TouchableOpacity>
               <TouchableOpacity
                 style={styles.sortButton}
                 onPress={() => console.log('Sort pressed')}
               >
-                <Feather name="sort-desc" size={20} color="#5ac268" />
+                <FontAwesome name='sort' size={15} color="#5ac268"/>
                 <Text style={styles.sortText}>Sort</Text>
               </TouchableOpacity>
             </View>
@@ -175,10 +176,9 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingHorizontal: 20,
     paddingVertical: 15,
-    backgroundColor: '#f5f5f5',
+    backgroundColor: '#fff',
     borderBottomWidth: 1,
     borderBottomColor: '#ddd',
-    marginTop: 40
   },
   titleContainer: {
     flex: 1,
@@ -245,31 +245,31 @@ const styles = StyleSheet.create({
     fontWeight: '600',
   },
   rightColumn: {
-    width: '67%',
-    padding: 15,
+    width: '70%',
+    // padding: 15,
     backgroundColor: '#fff',
-    borderRadius: 12,
-    margin: 5,
-    elevation: 3,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
+    // borderRadius: 12,
+    // elevation: 3,
+    // shadowColor: '#000',
+    // shadowOffset: { width: 0, height: 2 },
+    // shadowOpacity: 0.1,
+    // shadowRadius: 4,
   },
   filterSortContainer: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    marginBottom: 15,
     borderBottomColor: '#ddd',
     borderBottomWidth: 1,
-    paddingBottom: 10
+    paddingBottom: 10,
+    padding: 15,
   },
   filterButton: {
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: '#fff',
-    padding: 12,
-    borderRadius: 12,
+    paddingHorizontal: 10,
+    paddingVertical: 5,
+    borderRadius: 5,
     borderWidth: 1,
     borderColor: '#ddd',
     elevation: 2,
@@ -279,7 +279,7 @@ const styles = StyleSheet.create({
     shadowRadius: 2,
   },
   filterText: {
-    fontSize: 14,
+    fontSize: 12,
     fontWeight: '600',
     color: '#5ac268',
     marginLeft: 8,
@@ -288,8 +288,9 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: '#fff',
-    padding: 12,
-    borderRadius: 12,
+    paddingHorizontal: 10,
+    paddingVertical: 5,
+    borderRadius: 5,
     borderWidth: 1,
     borderColor: '#ddd',
     elevation: 2,
@@ -299,13 +300,14 @@ const styles = StyleSheet.create({
     shadowRadius: 2,
   },
   sortText: {
-    fontSize: 14,
+    fontSize: 12,
     fontWeight: '600',
     color: '#5ac268',
     marginLeft: 8,
   },
   itemList: {
-    paddingBottom: 20,
+    paddingVertical: 20,
+    paddingHorizontal: 10,
   },
   itemRow: {
     justifyContent: 'space-between',
@@ -316,13 +318,15 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
     borderRadius: 12,
     alignItems: 'center',
-    padding: 5
+    padding: 5,
+    // borderWidth: 1
   },
   itemImage: {
     width: 80,
     height: 80,
     borderRadius: 10,
     marginBottom: 10,
+    // borderWidth: 1
   },
   itemName: {
     fontSize: 14,

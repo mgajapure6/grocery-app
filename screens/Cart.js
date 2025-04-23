@@ -595,65 +595,6 @@ export default function Cart({ navigation }) {
             </View>
           </View>
         </Modal>
-
-        <View style={styles.bottomNav}>
-          <TouchableOpacity
-            style={styles.navItem}
-            onPress={() => {
-              setActiveTab('Home');
-              navigation.navigate('Homepage');
-            }}
-          >
-            <Feather
-              name="home"
-              size={24}
-              color={activeTab === 'Home' ? '#5ac268' : '#666'}
-            />
-            <Text style={[styles.navText, activeTab === 'Home' && styles.navTextActive]}>Home</Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            style={styles.navItem}
-            onPress={() => {
-              setActiveTab('Favorite');
-              console.log('Favorite pressed');
-            }}
-          >
-            <Feather
-              name="heart"
-              size={24}
-              color={activeTab === 'Favorite' ? '#5ac268' : '#666'}
-            />
-            <Text style={[styles.navText, activeTab === 'Favorite' && styles.navTextActive]}>Favorite</Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            style={styles.navItem}
-            onPress={() => {
-              setActiveTab('Categories');
-              navigation.navigate('Categories');
-            }}
-          >
-            <Feather
-              name="grid"
-              size={24}
-              color={activeTab === 'Categories' ? '#5ac268' : '#666'}
-            />
-            <Text style={[styles.navText, activeTab === 'Categories' && styles.navTextActive]}>Categories</Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            style={styles.navItem}
-            onPress={() => {
-              setActiveTab('User');
-              console.log('User pressed');
-            }}
-          >
-            <Feather
-              name="user"
-              size={24}
-              color={activeTab === 'User' ? '#5ac268' : '#666'}
-            />
-            <Text style={[styles.navText, activeTab === 'User' && styles.navTextActive]}>User</Text>
-          </TouchableOpacity>
-        </View>
       </View>
     </SafeAreaView>
 
@@ -1182,37 +1123,5 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     marginVertical: 20,
     fontWeight: '400',
-  },
-  bottomNav: {
-    flexDirection: 'row',
-    justifyContent: 'space-around',
-    alignItems: 'center',
-    paddingVertical: 12,
-    borderTopWidth: 1,
-    borderTopColor: '#ddd',
-    backgroundColor: '#fff',
-    elevation: 4,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: -2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    ...Platform.select({
-      ios: {
-        paddingBottom: 20,
-      },
-    }),
-  },
-  navItem: {
-    alignItems: 'center',
-  },
-  navText: {
-    fontSize: 12,
-    color: '#666',
-    marginTop: 5,
-    fontWeight: '500',
-  },
-  navTextActive: {
-    color: '#5ac268',
-    fontWeight: '600',
   },
 });

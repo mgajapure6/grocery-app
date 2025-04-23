@@ -77,29 +77,6 @@ export default function Homepage({ navigation }) {
   return (
     <SafeAreaView style={styles.safeArea} edges={['top', 'left', 'right']}>
       <View style={styles.container}>
-        {/* Status Bar */}
-        <View style={styles.statusBar}>
-          <TouchableOpacity
-            style={styles.addressContainer}
-            onPress={() => console.log('Select address')}
-          >
-            <Feather name="map-pin" size={20} color="#5ac268" style={styles.addressIcon} />
-            <Text style={styles.addressText} numberOfLines={1}>
-              {selectedAddress.title}: {selectedAddress.address}
-            </Text>
-            <Feather name="chevron-down" size={20} color="#666" />
-          </TouchableOpacity>
-          <TouchableOpacity
-            style={styles.cartContainer}
-            onPress={() => navigation.navigate('Cart')}
-          >
-            <Feather name="shopping-cart" size={24} color="#5ac268" />
-            <View style={styles.cartBadge}>
-              <Text style={styles.cartBadgeText}>{cart.length}</Text>
-            </View>
-          </TouchableOpacity>
-        </View>
-
         {/* Main Content */}
         <ScrollView contentContainerStyle={styles.scrollContent}>
           {/* Search Bar and Filter */}
@@ -186,86 +163,6 @@ export default function Homepage({ navigation }) {
             />
           </View>
         </ScrollView>
-
-        {/* Bottom Navigation */}
-        <View style={styles.bottomNav}>
-          <TouchableOpacity
-            style={styles.navItem}
-            onPress={() => setActiveTab('Home')}
-          >
-            <Feather
-              name="home"
-              size={24}
-              color={activeTab === 'Home' ? '#5ac268' : '#666'}
-            />
-            <Text
-              style={[styles.navText, activeTab === 'Home' && styles.navTextActive]}
-            >
-              Home
-            </Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            style={styles.navItem}
-            onPress={() => {
-              setActiveTab('Favorite');
-              console.log('Favorite pressed');
-            }}
-          >
-            <Feather
-              name="heart"
-              size={24}
-              color={activeTab === 'Favorite' ? '#5ac268' : '#666'}
-            />
-            <Text
-              style={[
-                styles.navText,
-                activeTab === 'Favorite' && styles.navTextActive,
-              ]}
-            >
-              Favorite
-            </Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            style={styles.navItem}
-            onPress={() => {
-              setActiveTab('Categories');
-              navigation.navigate('Categories');
-            }}
-          >
-            <Feather
-              name="grid"
-              size={24}
-              color={activeTab === 'Categories' ? '#5ac268' : '#666'}
-            />
-            <Text
-              style={[
-                styles.navText,
-                activeTab === 'Categories' && styles.navTextActive,
-              ]}
-            >
-              Categories
-            </Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            style={styles.navItem}
-            onPress={() => {
-              setActiveTab('User');
-              console.log('User pressedh');
-              navigation.navigate("UserProfile");
-            }}
-          >
-            <Feather
-              name="user"
-              size={24}
-              color={activeTab === 'User' ? '#5ac268' : '#666'}
-            />
-            <Text
-              style={[styles.navText, activeTab === 'User' && styles.navTextActive]}
-            >
-              User
-            </Text>
-          </TouchableOpacity>
-        </View>
       </View>
     </SafeAreaView>
 
@@ -525,38 +422,6 @@ const styles = StyleSheet.create({
   addToCartText: {
     color: '#fff',
     fontSize: 12,
-    fontWeight: '600',
-  },
-  bottomNav: {
-    flexDirection: 'row',
-    justifyContent: 'space-around',
-    alignItems: 'center',
-    paddingVertical: 12,
-    borderTopWidth: 1,
-    borderTopColor: '#ddd',
-    backgroundColor: '#fff',
-    elevation: 4,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: -2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    ...Platform.select({
-      ios: {
-        paddingBottom: 20,
-      },
-    }),
-  },
-  navItem: {
-    alignItems: 'center',
-  },
-  navText: {
-    fontSize: 12,
-    fontWeight: '500',
-    color: '#666',
-    marginTop: 5,
-  },
-  navTextActive: {
-    color: '#5ac268',
     fontWeight: '600',
   },
 });
