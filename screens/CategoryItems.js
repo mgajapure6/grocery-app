@@ -56,9 +56,12 @@ export default function CategoryItems({ navigation, route }) {
   // Render item in right column
   const renderItem = ({ item }) => (
     <View style={styles.itemCard}>
-      <Image source={item.image} style={styles.itemImage} />
-      <Text style={styles.itemName} numberOfLines={2}>{item.name}</Text>
-      <Text style={styles.itemPrice}>${item.price.toFixed(2)}</Text>
+      <TouchableOpacity onPress={() => navigation.navigate('ItemDetail', { item })}>
+        <Image source={item.image} style={styles.itemImage} />
+        <Text style={styles.itemName} numberOfLines={2}>{item.name}</Text>
+        <Text style={styles.itemPrice}>${item.price.toFixed(2)}</Text>
+      </TouchableOpacity>
+
       <TouchableOpacity
         style={styles.addToCartButton}
         onPress={() => {

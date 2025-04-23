@@ -32,14 +32,17 @@ export default function Homepage({ navigation }) {
 
   const renderBestDealItem = ({ item }) => (
     <View style={styles.dealCard}>
-      <Image source={item.image} style={styles.dealImage} />
-      <Text style={styles.dealName}>{item.name}</Text>
-      <Text style={styles.dealPrice}>${item.price.toFixed(2)}</Text>
-      {item.tag && (
-        <View style={styles.tagBadge}>
-          <Text style={styles.tagText}>{item.tag}</Text>
-        </View>
-      )}
+      <TouchableOpacity onPress={() => navigation.navigate('ItemDetail', { item })}>
+        <Image source={item.image} style={styles.dealImage} />
+        <Text style={styles.dealName}>{item.name}</Text>
+        <Text style={styles.dealPrice}>${item.price.toFixed(2)}</Text>
+        {item.tag && (
+          <View style={styles.tagBadge}>
+            <Text style={styles.tagText}>{item.tag}</Text>
+          </View>
+        )}
+      </TouchableOpacity>
+
       <TouchableOpacity
         style={styles.addToCartButton}
         onPress={() => addToCart(item)}
@@ -51,14 +54,17 @@ export default function Homepage({ navigation }) {
 
   const renderSuggestedItem = ({ item }) => (
     <View style={styles.dealCard}>
-      <Image source={item.image} style={styles.dealImage} />
-      <Text style={styles.dealName}>{item.name}</Text>
-      <Text style={styles.dealPrice}>${item.price.toFixed(2)}</Text>
-      {item.tag && (
-        <View style={[styles.tagBadge, styles.suggestedTag]}>
-          <Text style={styles.tagText}>{item.tag}</Text>
-        </View>
-      )}
+      <TouchableOpacity onPress={() => navigation.navigate('ItemDetail', { item })}>
+        <Image source={item.image} style={styles.dealImage} />
+        <Text style={styles.dealName}>{item.name}</Text>
+        <Text style={styles.dealPrice}>${item.price.toFixed(2)}</Text>
+        {item.tag && (
+          <View style={[styles.tagBadge, styles.suggestedTag]}>
+            <Text style={styles.tagText}>{item.tag}</Text>
+          </View>
+        )}
+      </TouchableOpacity>
+
       <TouchableOpacity
         style={styles.addToCartButton}
         onPress={() => addToCart(item)}
@@ -69,7 +75,7 @@ export default function Homepage({ navigation }) {
   );
 
   return (
-    <SafeAreaView style={styles.safeArea} edges={[ 'left', 'right']}>
+    <SafeAreaView style={styles.safeArea} edges={['top', 'left', 'right']}>
       <View style={styles.container}>
         {/* Status Bar */}
         <View style={styles.statusBar}>
@@ -244,7 +250,8 @@ export default function Homepage({ navigation }) {
             style={styles.navItem}
             onPress={() => {
               setActiveTab('User');
-              console.log('User pressed');
+              console.log('User pressedh');
+              navigation.navigate("UserProfile");
             }}
           >
             <Feather
@@ -280,24 +287,18 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingHorizontal: 20,
     paddingVertical: 15,
-    backgroundColor: '#f5f5f5',
+    backgroundColor: '#fff',
     borderBottomWidth: 1,
     borderBottomColor: '#ddd',
-    marginTop: 40
   },
   addressContainer: {
     flexDirection: 'row',
     alignItems: 'center',
     flex: 1,
     marginRight: 15,
-    backgroundColor: '#f9f9f9',
+    backgroundColor: '#fff',
     borderRadius: 12,
     padding: 10,
-    elevation: 2,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.1,
-    shadowRadius: 2,
   },
   addressIcon: {
     marginRight: 8,
@@ -343,15 +344,15 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     borderWidth: 1,
     borderColor: '#ddd',
-    borderRadius: 12,
+    // borderRadius: 12,
     paddingHorizontal: 12,
     height: 50,
     backgroundColor: '#fff',
-    elevation: 2,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.1,
-    shadowRadius: 2,
+    // elevation: 2,
+    // shadowColor: '#000',
+    // shadowOffset: { width: 0, height: 1 },
+    // shadowOpacity: 0.1,
+    // shadowRadius: 2,
   },
   searchIcon: {
     marginRight: 8,
@@ -366,23 +367,23 @@ const styles = StyleSheet.create({
     marginLeft: 10,
     padding: 12,
     backgroundColor: '#fff',
-    borderRadius: 12,
-    elevation: 2,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.1,
-    shadowRadius: 2,
+    // borderRadius: 12,
+    // elevation: 2,
+    // shadowColor: '#000',
+    // shadowOffset: { width: 0, height: 1 },
+    // shadowOpacity: 0.1,
+    // shadowRadius: 2,
   },
   sectionContainer: {
     marginBottom: 20,
     backgroundColor: '#fff',
-    borderRadius: 12,
+    // borderRadius: 12,
     padding: 15,
-    elevation: 3,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
+    // elevation: 3,
+    // shadowColor: '#000',
+    // shadowOffset: { width: 0, height: 2 },
+    // shadowOpacity: 0.1,
+    // shadowRadius: 4,
   },
   sectionHeader: {
     flexDirection: 'row',
@@ -410,7 +411,7 @@ const styles = StyleSheet.create({
   categoryCard: {
     width: '22%',
     backgroundColor: '#fff',
-    borderRadius: 12,
+    // borderRadius: 12,
     alignItems: 'center',
     marginBottom: 10,
 
@@ -418,7 +419,7 @@ const styles = StyleSheet.create({
   categoryImage: {
     width: 60,
     height: 60,
-    borderRadius: 10,
+    // borderRadius: 10,
     marginBottom: 8,
   },
   categoryName: {
@@ -430,18 +431,18 @@ const styles = StyleSheet.create({
   },
   bannerContainer: {
     marginVertical: 20,
-    borderRadius: 12,
+    // borderRadius: 12,
     overflow: 'hidden',
-    elevation: 3,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
+    // elevation: 3,
+    // shadowColor: '#000',
+    // shadowOffset: { width: 0, height: 2 },
+    // shadowOpacity: 0.1,
+    // shadowRadius: 4,
   },
   bannerImage: {
     width: '100%',
     height: 150,
-    borderRadius: 12,
+    // borderRadius: 12,
   },
   bannerOverlay: {
     position: 'absolute',
@@ -450,8 +451,8 @@ const styles = StyleSheet.create({
     right: 0,
     backgroundColor: 'rgba(0, 0, 0, 0.7)',
     padding: 15,
-    borderBottomLeftRadius: 12,
-    borderBottomRightRadius: 12,
+    // borderBottomLeftRadius: 12,
+    // borderBottomRightRadius: 12,
   },
   bannerTitle: {
     fontSize: 18,
@@ -469,9 +470,10 @@ const styles = StyleSheet.create({
   },
   dealCard: {
     width: 160,
-    marginRight: 15,
+    marginRight: 10,
+    marginLeft: 5,
     backgroundColor: '#fff',
-    borderRadius: 12,
+    // borderRadius: 12,
     padding: 12,
     alignItems: 'center',
     elevation: 2,
@@ -483,7 +485,7 @@ const styles = StyleSheet.create({
   dealImage: {
     width: 100,
     height: 100,
-    borderRadius: 10,
+    // borderRadius: 10,
     marginBottom: 10,
   },
   dealName: {
@@ -502,7 +504,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#ffebee',
     paddingVertical: 4,
     paddingHorizontal: 8,
-    borderRadius: 12,
+    // borderRadius: 12,
     marginBottom: 8,
   },
   suggestedTag: {
@@ -512,12 +514,13 @@ const styles = StyleSheet.create({
     fontSize: 10,
     fontWeight: '600',
     color: '#333',
+    textAlign: 'center'
   },
   addToCartButton: {
     backgroundColor: '#5ac268',
     paddingVertical: 8,
     paddingHorizontal: 12,
-    borderRadius: 8,
+    // borderRadius: 8,
   },
   addToCartText: {
     color: '#fff',

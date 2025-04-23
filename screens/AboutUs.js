@@ -1,77 +1,60 @@
-import React, { useContext, useState } from 'react';
+import React, { useState } from 'react';
 import {
   View,
   Text,
   TouchableOpacity,
   StyleSheet,
   ScrollView,
-  Image,
-  FlatList,
-  Platform,
+  StatusBar,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Feather } from '@expo/vector-icons';
-import { CartContext } from '../contexts/CartContext';
-import { categories } from '../data/staticData';
 
-export default function Categories({ navigation }) {
-  const { cart } = useContext(CartContext);
-  const [activeTab, setActiveTab] = useState('Categories');
-
-  const renderCategoryItem = ({ item, mainCategory }) => (
-    <TouchableOpacity
-      style={styles.categoryCard}
-      onPress={() => navigation.navigate('CategoryItems', { mainCategory, subCategoryId: item.id })}
-    >
-      <Image source={item.image} style={styles.categoryImage} />
-      <Text style={styles.categoryName}>{item.name}</Text>
-    </TouchableOpacity>
-  );
-
-  const renderSection = (title, mainCategory, data, iconName) => (
-    <View style={styles.sectionContainer}>
-      <View style={styles.sectionHeader}>
-        <Feather name={iconName} size={20} color="#333" style={styles.sectionIcon} />
-        <Text style={styles.sectionTitle}>{title}</Text>
-      </View>
-      <FlatList
-        data={data}
-        renderItem={({ item }) => renderCategoryItem({ item, mainCategory })}
-        keyExtractor={(item) => item.id.toString()}
-        numColumns={4}
-        columnWrapperStyle={styles.categoryRow}
-        scrollEnabled={false}
-      />
-    </View>
-  );
+export default function AboutUs({ navigation }) {
+  const [activeTab, setActiveTab] = useState('User');
 
   return (
     <SafeAreaView style={styles.safeArea} edges={['top', 'left', 'right']}>
+      <StatusBar backgroundColor="#fff" barStyle="dark-content" />
       <View style={styles.container}>
         {/* Header */}
         <View style={styles.header}>
-          <TouchableOpacity onPress={() => navigation.goBack('Homepage')}>
+          <TouchableOpacity onPress={() => navigation.goBack()}>
             <Feather name="arrow-left" size={24} color="#333" />
           </TouchableOpacity>
-          <Text style={styles.headerTitle}>All Categories</Text>
-          <TouchableOpacity
-            style={styles.cartContainer}
-            onPress={() => navigation.navigate('Cart')}
-          >
-            <Feather name="shopping-cart" size={24} color="#5ac268" />
-            <View style={styles.cartBadge}>
-              <Text style={styles.cartBadgeText}>{cart.length}</Text>
-            </View>
-          </TouchableOpacity>
+          <View style={styles.titleContainer}>
+            <Text style={styles.title}>About Us</Text>
+          </View>
+          <View style={{ width: 24 }} />
         </View>
 
         {/* Main Content */}
         <ScrollView contentContainerStyle={styles.scrollContent}>
-          {renderSection('Grocery and Kitchen', 'groceryKitchen', categories.groceryKitchen, 'shopping-bag')}
-          {renderSection('Snacks and Drinks', 'snacksDrinks', categories.snacksDrinks, 'coffee')}
-          {renderSection('Beauty and Personal Care', 'beautyPersonalCare', categories.beautyPersonalCare, 'heart')}
-          {renderSection('Household Essentials', 'householdEssentials', categories.householdEssentials, 'home')}
-          {renderSection('Shop by Store', 'shopByStore', categories.shopByStore, 'bookmark')}
+          <View style={styles.sectionContainer}>
+            <View style={styles.sectionHeader}>
+              <Feather name="info" size={20} color="#333" style={styles.sectionIcon} />
+              <Text style={styles.sectionTitle}>About Our App</Text>
+            </View>
+            <Text style={styles.sectionText}>
+              Welcome to our e-commerce app, your one-stop shop for all your needs. We strive to
+              provide a seamless shopping experience with a wide range of products, secure payment
+              options, and fast delivery.
+            </Text>
+            <Text style={styles.sectionText}>
+              Our mission is to make online shopping easy, affordable, and reliable. Founded in 2025,
+              we are committed to customer satisfaction and continuous improvement.
+            </Text>
+            <Text style={styles.sectionText}>
+              For inquiries, contact us at support@example.com or visit our website at
+              www.example.com.
+            </Text>
+            <TouchableOpacity
+              style={styles.contactButton}
+              onPress={() => console.log('Visit website')}
+            >
+              <Text style={styles.contactButtonText}>Visit Our Website</Text>
+            </TouchableOpacity>
+          </View>
         </ScrollView>
 
         {/* Bottom Navigation */}
@@ -102,7 +85,9 @@ export default function Categories({ navigation }) {
               size={24}
               color={activeTab === 'Favorite' ? '#5ac268' : '#666'}
             />
-            <Text style={[styles.navText, activeTab === 'Favorite' && styles.navTextActive]}>Favorite</Text>
+            <Text style={[styles.navText, activeTab === 'Favorite' && styles.navTextActive]}>
+              Favorite
+            </Text>
           </TouchableOpacity>
           <TouchableOpacity
             style={styles.navItem}
@@ -116,13 +101,15 @@ export default function Categories({ navigation }) {
               size={24}
               color={activeTab === 'Categories' ? '#5ac268' : '#666'}
             />
-            <Text style={[styles.navText, activeTab === 'Categories' && styles.navTextActive]}>Categories</Text>
+            <Text style={[styles.navText, activeTab === 'Categories' && styles.navTextActive]}>
+              Categories
+            </Text>
           </TouchableOpacity>
           <TouchableOpacity
             style={styles.navItem}
             onPress={() => {
               setActiveTab('User');
-              navigation.navigate("UserProfile");
+              navigation.navigate('UserProfile');
             }}
           >
             <Feather
@@ -135,14 +122,13 @@ export default function Categories({ navigation }) {
         </View>
       </View>
     </SafeAreaView>
-
   );
 }
 
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: '#fff', // Match statusBar background
+    backgroundColor: '#fff',
   },
   container: {
     flex: 1,
@@ -158,36 +144,20 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     borderBottomColor: '#ddd',
   },
-  headerTitle: {
+  titleContainer: {
+    flex: 1,
+    alignItems: 'center',
+  },
+  title: {
     fontSize: 22,
     fontWeight: '700',
     color: '#333',
-  },
-  cartContainer: {
-    position: 'relative',
-  },
-  cartBadge: {
-    position: 'absolute',
-    top: -5,
-    right: -5,
-    backgroundColor: '#5ac268',
-    borderRadius: 10,
-    width: 18,
-    height: 18,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  cartBadgeText: {
-    color: '#fff',
-    fontSize: 12,
-    fontWeight: 'bold',
   },
   scrollContent: {
     padding: 20,
     paddingBottom: 100,
   },
   sectionContainer: {
-    marginBottom: 20,
     backgroundColor: '#fff',
     borderRadius: 12,
     padding: 15,
@@ -210,30 +180,29 @@ const styles = StyleSheet.create({
     fontWeight: '700',
     color: '#333',
   },
-  categoryRow: {
-    justifyContent: 'space-between',
+  sectionText: {
+    fontSize: 16,
+    fontWeight: '500',
+    color: '#666',
     marginBottom: 10,
+    lineHeight: 24,
   },
-  categoryCard: {
-    width: '22%',
-    backgroundColor: '#fff',
+  contactButton: {
+    backgroundColor: '#5ac268',
+    paddingVertical: 15,
     borderRadius: 12,
-    padding: 0,
     alignItems: 'center',
-    marginBottom: 10
+    marginTop: 20,
+    elevation: 2,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.1,
+    shadowRadius: 2,
   },
-  categoryImage: {
-    width: 60,
-    height: 60,
-    borderRadius: 10,
-    marginBottom: 8,
-  },
-  categoryName: {
-    fontSize: 12,
-    fontWeight: '600',
-    textAlign: 'center',
-    color: '#333',
-    flexWrap: 'wrap',
+  contactButtonText: {
+    fontSize: 16,
+    fontWeight: '700',
+    color: '#fff',
   },
   bottomNav: {
     flexDirection: 'row',
@@ -248,20 +217,15 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: -2 },
     shadowOpacity: 0.1,
     shadowRadius: 4,
-    ...Platform.select({
-      ios: {
-        paddingBottom: 20,
-      },
-    }),
   },
   navItem: {
     alignItems: 'center',
   },
   navText: {
     fontSize: 12,
+    fontWeight: '500',
     color: '#666',
     marginTop: 5,
-    fontWeight: '500',
   },
   navTextActive: {
     color: '#5ac268',

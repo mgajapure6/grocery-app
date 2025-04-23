@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Order Tracking Map</title>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <style>
+    html, body, #map {
+      height: 100%;
+      margin: 0;
+      padding: 0;
+    }
+    /* Grayscale and minimal filter for map tiles */
+    .leaflet-tile {
+      filter: grayscale(50%) contrast(1) brightness(.8) blur(0px);
+      -webkit-filter: grayscale(50%) contrast(1) brightness(.8) blur(0px);
+      
+    }
+    /* Ensure markers and polyline are not affected */
+    .restaurant-marker, .user-marker, .driver-marker {
+      filter: none !important;
+      -webkit-filter: none !important;
+    }
+    .leaflet-polyline {
+      filter: none !important;
+      -webkit-filter: none !important;
+    }
+    /* Style drop pin for restaurant and user */
+    .drop-pin {
+      text-shadow: 0 0 3px rgba(0, 0, 0, 0.5); /* Subtle shadow for drop pin effect */
+      transform: translateY(-10px); /* Adjust vertical position */
+    }
+  </style>
+</head>
+<body>
+  <div id="map"></div>
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script>
+    let map, restaurantMarker, userMarker, driverMarker, polyline;
+    let driverPosition;
+
+    function initializeMap(locationData) {
+      // Initialize map with default center (Pune) until data is received
+      map = L.map('map').setView([18.5204, 73.8567], 13); // Pune center
+
+      // Use CartoDB Positron tiles for minimal look
+      L.tileLayer('https://{s}.basemaps.cartocdn.com/light_nolabels/{z}/{x}/{y}.png', {
+        attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, © <a href="https://carto.com/attributions">CARTO</a>',
+        maxZoom: 20
+      }).addTo(map);
+
+      if (locationData) {
+        const { restaurant, user, path } = locationData;
+
+        // Add restaurant marker
+        restaurantMarker = L.marker([restaurant.lat, restaurant.lng], {
+          icon: L.divIcon({
+            className: 'restaurant-marker',
+            html: '<div class="drop-pin" style="color: #ff3b30; font-size: 30px;">📍</div>',
+            iconSize: [30, 30],
+            iconAnchor: [15, 30]
+          })
+        }).addTo(map).bindPopup(restaurant.name);
+
+        // Add user marker
+        userMarker = L.marker([user.lat, user.lng], {
+          icon: L.divIcon({
+            className: 'user-marker',
+            html: '<div class="drop-pin" style="color: #5ac268; font-size: 30px;">📍</div>',
+            iconSize: [30, 30],
+            iconAnchor: [15, 30]
+          })
+        }).addTo(map).bindPopup('Your Location');
+
+        // Add driver marker (starts at path[0])
+        driverPosition = path[0];
+        driverMarker = L.marker([driverPosition.lat, driverPosition.lng], {
+          icon: L.divIcon({
+            className: 'driver-marker',
+            html: '<div style="color: #007aff; font-size: 30px;">🚴</div>',
+            iconSize: [30, 30],
+            iconAnchor: [15, 30]
+          })
+        }).addTo(map).bindPopup('John');
+
+        // Add polyline
+        polyline = L.polyline(path, { color: '#2e7d32', weight: 4 }).addTo(map);
+
+        // Fit map to bounds
+        map.fitBounds([
+          [restaurant.lat, restaurant.lng],
+          [user.lat, user.lng]
+        ], { padding: [100, 50] });
+      }
+    }
+
+    // Update driver position
+    function updateDriverPosition(newPosition) {
+      driverPosition = newPosition;
+      driverMarker.setLatLng([newPosition.lat, newPosition.lng]);
+      map.panTo([newPosition.lat, newPosition.lng], { animate: true });
+    }
+
+    // Listen for messages from React Native
+    window.addEventListener('message', (event) => {
+      try {
+        const data = JSON.parse(event.data);
+        if (data.type === 'initLocation') {
+          initializeMap(data.data); // Initialize map with received location data
+        } else if (data.type === 'updateDriverPosition') {
+          updateDriverPosition(data.position);
+        }
+      } catch (error) {
+        console.error('Error parsing message:', error);
+      }
+    });
+
+    // Initialize map with no data until message is received
+    document.addEventListener('DOMContentLoaded', () => initializeMap(null));
+  </script>
+</body>
+</html>

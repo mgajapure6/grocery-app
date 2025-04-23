@@ -290,7 +290,7 @@ export default function Cart({ navigation }) {
   );
 
   return (
-    <SafeAreaView style={styles.safeArea} edges={['left', 'right']}>
+    <SafeAreaView style={styles.safeArea} edges={['top', 'left', 'right']}>
       <View style={styles.container}>
         <View style={styles.header}>
           <TouchableOpacity onPress={() => navigation.goBack()}>
@@ -495,11 +495,17 @@ export default function Cart({ navigation }) {
                     console.log('No payment method selected, opening payment modal');
                   } else {
                     console.log('Proceeding with order:', { address: selectedAddress, payment: selectedPaymentMethod, coupon: selectedCoupon });
+                    navigation.navigate('OrderSummary', {
+                      selectedAddress,
+                      selectedPaymentMethod,
+                      selectedCoupon,
+                      selectedTip,
+                    });
                   }
                 }}
                 disabled={!selectedAddress || !selectedPaymentMethod}
               >
-                <Text style={styles.proceedButtonText}>Proceed to Checkout</Text>
+                <Text style={styles.proceedButtonText}>Proceed to Order Summary</Text>
               </TouchableOpacity>
             </View>
           </View>
@@ -669,10 +675,9 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingHorizontal: 20,
     paddingVertical: 15,
-    backgroundColor: '#f5f5f5',
+    backgroundColor: '#fff',
     borderBottomWidth: 1,
     borderBottomColor: '#ddd',
-    marginTop: 40
   },
   headerTitle: {
     fontSize: 22,
