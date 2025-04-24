@@ -8,7 +8,7 @@ const Stack = createNativeStackNavigator();
 
 export default function App({ navigation }) {
   return (
-    <SafeAreaView style={styles.safeArea} edges={['top', 'bottom', 'left', 'right']}>
+    <SafeAreaView style={styles.safeArea} edges={['top', 'left', 'right']}>
       <AppNavigator />
     </SafeAreaView>
   );
