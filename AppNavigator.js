@@ -31,6 +31,7 @@ import AccountPrivacy from './screens/AccountPrivacy';
 import Payment from './screens/Payment';
 import CategoryItems from './screens/CategoryItems';
 import { CartProvider, CartContext } from './contexts/CartContext';
+import AdminNavigator from './screens/Admin/AdminNavigator';
 
 const Tab = createBottomTabNavigator();
 const Stack = createStackNavigator();
@@ -165,6 +166,7 @@ export default function AppNavigator() {
           <Stack.Screen name="AccountPrivacy" component={AccountPrivacy} />
           <Stack.Screen name="Payment" component={Payment} />
           <Stack.Screen name="CategoryItems" component={CategoryItems} />
+          <Stack.Screen name="AdminMain" component={AdminNavigator} />
         </Stack.Navigator>
       </NavigationContainer>
     </CartProvider>

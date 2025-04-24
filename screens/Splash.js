@@ -11,8 +11,11 @@ export default function Splash({ navigation }) {
           title="Go to Onboarding"
           onPress={() => navigation.navigate('Onboarding')}></Button>
           <Button
-          title="Go to Homepage"
+          title="Go to Customer App"
           onPress={() => navigation.navigate('Main')}></Button>
+          <Button
+          title="Go to Admin App"
+          onPress={() => navigation.navigate('AdminMain')}></Button>
       </View>
       <VEGETABLEIMG width={500} height={500} style={styles.imageVegetable} />
     </View>

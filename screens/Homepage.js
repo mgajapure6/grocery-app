@@ -13,17 +13,19 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Feather } from '@expo/vector-icons';
 import { CartContext } from '../contexts/CartContext';
-import { addresses, categories, banner, suggestedItems, bestDealItems } from '../data/staticData';
+import { addresses, banner, suggestedItems, bestDealItems, mainCategories, subCategories, categories } from '../data/staticData';
 
 export default function Homepage({ navigation }) {
+  console.log("Homepage called");
   const { cart, addToCart } = useContext(CartContext);
   const [selectedAddress, setSelectedAddress] = useState(addresses[0]);
   const [activeTab, setActiveTab] = useState('Home');
+  const [selectedMainCategory, setSelectedMainCategory] = useState(categories.groceryAndKitchen);
 
-  const renderCategoryItem = ({ item }) => (
+  const renderSubCategory = ({ item}) => (
     <TouchableOpacity
       style={styles.categoryCard}
-      onPress={() => console.log(`Selected category: ${item.name}`)}
+      onPress={() => navigation.navigate('CategoryItems', { mainCategory: selectedMainCategory, subCategoryId: item.id })}
     >
       <Image source={item.image} style={styles.categoryImage} />
       <Text style={styles.categoryName}>{item.name}</Text>
@@ -107,8 +109,8 @@ export default function Homepage({ navigation }) {
               </TouchableOpacity>
             </View>
             <FlatList
-              data={categories.homepage}
-              renderItem={renderCategoryItem}
+              data={selectedMainCategory.subcategories}
+              renderItem={({ item }) => renderSubCategory({ item })}
               keyExtractor={(item) => item.id.toString()}
               numColumns={4}
               columnWrapperStyle={styles.categoryRow}
@@ -119,10 +121,10 @@ export default function Homepage({ navigation }) {
           {/* Banner */}
           <View style={styles.bannerContainer}>
             <Image source={banner.image} style={styles.bannerImage} />
-            <View style={styles.bannerOverlay}>
+            {/* <View style={styles.bannerOverlay}>
               <Text style={styles.bannerTitle}>{banner.title}</Text>
               <Text style={styles.bannerSubtitle}>{banner.subtitle}</Text>
-            </View>
+            </View> */}
           </View>
 
           {/* Suggested Items */}
@@ -327,7 +329,7 @@ const styles = StyleSheet.create({
     flexWrap: 'wrap',
   },
   bannerContainer: {
-    marginVertical: 20,
+    marginBottom: 20,
     borderRadius: 12,
     overflow: 'hidden',
     elevation: 3,
@@ -338,8 +340,9 @@ const styles = StyleSheet.create({
   },
   bannerImage: {
     width: '100%',
-    height: 150,
+    height: 220,
     borderRadius: 12,
+    resizeMode: 'stretch',
   },
   bannerOverlay: {
     position: 'absolute',

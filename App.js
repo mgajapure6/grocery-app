@@ -3,6 +3,7 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { StyleSheet } from 'react-native';
 import AppNavigator from './AppNavigator';
+import AdminNavigator from './screens/Admin/AdminNavigator';
 
 const Stack = createNativeStackNavigator();
 

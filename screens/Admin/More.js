@@ -1,9 +1,9 @@
 import { Button, StyleSheet, Text, View } from 'react-native';
 
-export default function AdminOrders({navigation}) {
+export default function AdminMore({navigation}) {
   return (
     <View style={styles.container}>
-      <Text style={styles.text}>Orders</Text>
+      <Text style={styles.text}>More</Text>
     </View>
   );
 }

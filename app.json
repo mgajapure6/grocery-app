@@ -13,11 +13,18 @@
       "backgroundColor": "#ffffff"
     },
     "plugins": [
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "Allow $(PRODUCT_NAME) to access your photos to upload product images."
+        }
+      ]
     ],
     "ios": {
       "supportsTablet": true,
-      "permissions": {
-        "NSLocationWhenInUseUsageDescription": "Allow this app to access your location to track your order."
+      "infoPlist": {
+        "NSLocationWhenInUseUsageDescription": "Allow this app to access your location to track your order.",
+        "NSPhotoLibraryUsageDescription": "Allow $(PRODUCT_NAME) to access your photos to upload product images."
       }
     },
     "android": {
@@ -25,7 +32,12 @@
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
       },
-      "permissions": ["ACCESS_FINE_LOCATION", "ACCESS_COARSE_LOCATION"]
+      "permissions": [
+        "ACCESS_FINE_LOCATION",
+        "ACCESS_COARSE_LOCATION",
+        "READ_EXTERNAL_STORAGE",
+        "WRITE_EXTERNAL_STORAGE"
+      ]
     },
     "web": {
       "favicon": "./assets/favicon.png"

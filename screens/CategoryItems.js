@@ -16,21 +16,13 @@ import { FontAwesome } from '@expo/vector-icons'
 
 export default function CategoryItems({ navigation, route }) {
   const { addToCart, cart } = useContext(CartContext);
-  const { mainCategory, subCategoryId } = route.params; // e.g., mainCategory: 'householdEssentials', subCategoryId: '401'
+  const { mainCategory, subCategoryId } = route.params;
   const [selectedSubCategoryId, setSelectedSubCategoryId] = useState(subCategoryId);
 
   // Get subcategories and items
-  const subCategories = categories[mainCategory] || [];
+  const subCategories = mainCategory.subcategories || [];
   const selectedSubCategory = subCategories.find(sub => sub.id === selectedSubCategoryId);
   const items = selectedSubCategory ? selectedSubCategory.items : [];
-
-  // Main category name for title
-  const mainCategoryName = {
-    groceryKitchen: 'Grocery & Kitchen',
-    snacksDrinks: 'Snacks & Drinks',
-    beautyPersonalCare: 'Beauty & Personal Care',
-    householdEssentials: 'Household Essentials'
-  }[mainCategory] || 'Categories';
 
   // Render subcategory in left column
   const renderSubCategoryItem = ({ item }) => (
@@ -84,7 +76,7 @@ export default function CategoryItems({ navigation, route }) {
             <Feather name="arrow-left" size={24} color="#333" />
           </TouchableOpacity>
           <View style={styles.titleContainer}>
-            <Text style={styles.title}>{mainCategoryName}</Text>
+            <Text style={styles.title}>{mainCategory.name}</Text>
           </View>
           <TouchableOpacity
             style={styles.searchButton}

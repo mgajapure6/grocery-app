@@ -12,7 +12,7 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Feather } from '@expo/vector-icons';
 import { CartContext } from '../contexts/CartContext';
-import { categories } from '../data/staticData';
+import { categories, mainCategories, subCategories } from '../data/staticData';
 
 export default function Categories({ navigation }) {
   const { cart } = useContext(CartContext);
@@ -28,16 +28,33 @@ export default function Categories({ navigation }) {
     </TouchableOpacity>
   );
 
-  const renderSection = (title, mainCategory, data, iconName) => (
+  // const renderSection = (title, mainCategory, data, iconName) => (
+  //   <View style={styles.sectionContainer}>
+  //     <View style={styles.sectionHeader}>
+  //       <Feather name={iconName} size={20} color="#333" style={styles.sectionIcon} />
+  //       <Text style={styles.sectionTitle}>{data}</Text>
+  //     </View>
+  //     <FlatList
+  //       data={data}
+  //       renderItem={({ item }) => renderCategoryItem({ item, mainCategory })}
+  //       keyExtractor={(item) => item.id.toString()}
+  //       numColumns={4}
+  //       columnWrapperStyle={styles.categoryRow}
+  //       scrollEnabled={false}
+  //     />
+  //   </View>
+  // );
+
+  const renderSection = (mainCategory) => (
     <View style={styles.sectionContainer}>
       <View style={styles.sectionHeader}>
-        <Feather name={iconName} size={20} color="#333" style={styles.sectionIcon} />
-        <Text style={styles.sectionTitle}>{title}</Text>
+        <Feather name={mainCategory.iconName} size={20} color="#333" style={styles.sectionIcon} />
+        <Text style={styles.sectionTitle}>{mainCategory.name}</Text>
       </View>
       <FlatList
-        data={data}
+        data={mainCategory.subcategories}
         renderItem={({ item }) => renderCategoryItem({ item, mainCategory })}
-        keyExtractor={(item) => item.id.toString()}
+        keyExtractor={(item) => item.id}
         numColumns={4}
         columnWrapperStyle={styles.categoryRow}
         scrollEnabled={false}
@@ -50,11 +67,14 @@ export default function Categories({ navigation }) {
       <View style={styles.container}>
         {/* Main Content */}
         <ScrollView contentContainerStyle={styles.scrollContent}>
-          {renderSection('Grocery and Kitchen', 'groceryKitchen', categories.groceryKitchen, 'shopping-bag')}
-          {renderSection('Snacks and Drinks', 'snacksDrinks', categories.snacksDrinks, 'coffee')}
-          {renderSection('Beauty and Personal Care', 'beautyPersonalCare', categories.beautyPersonalCare, 'heart')}
-          {renderSection('Household Essentials', 'householdEssentials', categories.householdEssentials, 'home')}
-          {renderSection('Shop by Store', 'shopByStore', categories.shopByStore, 'bookmark')}
+          {/* {renderSection('Grocery and Kitchen', 'groceryKitchen', categories.groceryAndKitchen, 'shopping-bag')}
+          {renderSection('Snacks and Drinks', 'snacksDrinks', categories.snacksAndDrinks, 'coffee')}
+          {renderSection('Beauty and Personal Care', 'beautyPersonalCare', categories.beautyAndWellness, 'heart')}
+          {renderSection('Household Essentials', 'householdEssentials', categories.householdAndLifestyle, 'home')} */}
+          {renderSection(categories.groceryAndKitchen)}
+          {renderSection(categories.snacksAndDrinks)}
+          {renderSection(categories.beautyAndWellness)}
+          {renderSection(categories.householdAndLifestyle)}
         </ScrollView>
       </View>
     </SafeAreaView>

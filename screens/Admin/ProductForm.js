@@ -1,9 +1,9 @@
 import { Button, StyleSheet, Text, View } from 'react-native';
 
-export default function AdminItems({navigation}) {
+export default function AdminProductAddUpdate({navigation}) {
   return (
     <View style={styles.container}>
-      <Text style={styles.text}>AdminItems</Text>
+      <Text style={styles.text}>Add Update Products</Text>
     </View>
   );
 }
