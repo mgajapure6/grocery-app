@@ -1,17 +1,17 @@
 import React, { useContext, useState } from 'react';
-import { NavigationContainer } from '@react-navigation/native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { createStackNavigator } from '@react-navigation/stack';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import { Feather } from '@expo/vector-icons';
 
 import AdminDashboard from './Dashboard';
-import AdminProducts from './AdminProducts';
+import AdminProducts from './AdminCategories';
 import AdminOrders from './Orders';
 import AdminUsers from './Users';
 import AdminMore from './More';
 import AdminProductAddUpdate from './ProductForm';
-import ProductList from './ProductList';
+import AdminProductList from './AdminProductList';
+import AdminItemDetail from './AdminItemDetail';
 
 
 const AdminTab = createBottomTabNavigator();
@@ -79,7 +79,8 @@ export default function AdminNavigator({ navigation }) {
       <AdminStack.Navigator initialRouteName="AdminMain" screenOptions={{ headerShown: false }}>
         <AdminStack.Screen name="AdminMain" component={TabNavigator} />
         <AdminStack.Screen name="AdminProductAddUpdate" component={AdminProductAddUpdate} />
-        <AdminStack.Screen name="ProductList" component={ProductList} />
+        <AdminStack.Screen name="AdminProductList" component={AdminProductList} />
+        <AdminStack.Screen name="AdminItemDetail" component={AdminItemDetail} />
       </AdminStack.Navigator>
   );
 }

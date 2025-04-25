@@ -124,5 +124,6 @@ export const suggestedItems = extractItemsByTag('suggested');
 export const bestDealItems = extractItemsByTag('best deals');
 
 export const mainCategories = extractMainCategories();
+export const mainCategoryList = allCategories();
 export const subCategories = extractSubCategories();
 export const categories = allCategories();
