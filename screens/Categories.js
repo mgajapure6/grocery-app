@@ -1,4 +1,4 @@
-import React, { useContext, useState, useEffect } from 'react';
+import React, {useEffect } from 'react';
 import {
   View,
   Text,
@@ -6,17 +6,13 @@ import {
   StyleSheet,
   ScrollView,
   FlatList,
-  Platform,
 } from 'react-native';
 import { Image } from 'expo-image';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Feather } from '@expo/vector-icons';
-import { CartContext } from '../contexts/CartContext';
 import { categories, mainCategories, subCategories } from '../data/staticData';
 
 export default function Categories({ navigation }) {
-  const { cart } = useContext(CartContext);
-  const [activeTab, setActiveTab] = useState('Categories');
 
   useEffect(() => {
       // Preload images
@@ -36,23 +32,6 @@ export default function Categories({ navigation }) {
       <Text style={styles.categoryName}>{item.name}</Text>
     </TouchableOpacity>
   );
-
-  // const renderSection = (title, mainCategory, data, iconName) => (
-  //   <View style={styles.sectionContainer}>
-  //     <View style={styles.sectionHeader}>
-  //       <Feather name={iconName} size={20} color="#333" style={styles.sectionIcon} />
-  //       <Text style={styles.sectionTitle}>{data}</Text>
-  //     </View>
-  //     <FlatList
-  //       data={data}
-  //       renderItem={({ item }) => renderCategoryItem({ item, mainCategory })}
-  //       keyExtractor={(item) => item.id.toString()}
-  //       numColumns={4}
-  //       columnWrapperStyle={styles.categoryRow}
-  //       scrollEnabled={false}
-  //     />
-  //   </View>
-  // );
 
   const renderSection = (mainCategory) => (
     <View style={styles.sectionContainer}>
@@ -74,12 +53,7 @@ export default function Categories({ navigation }) {
   return (
     <SafeAreaView style={styles.safeArea} edges={['top', 'left', 'right']}>
       <View style={styles.container}>
-        {/* Main Content */}
         <ScrollView contentContainerStyle={styles.scrollContent}>
-          {/* {renderSection('Grocery and Kitchen', 'groceryKitchen', categories.groceryAndKitchen, 'shopping-bag')}
-          {renderSection('Snacks and Drinks', 'snacksDrinks', categories.snacksAndDrinks, 'coffee')}
-          {renderSection('Beauty and Personal Care', 'beautyPersonalCare', categories.beautyAndWellness, 'heart')}
-          {renderSection('Household Essentials', 'householdEssentials', categories.householdAndLifestyle, 'home')} */}
           {renderSection(categories.groceryAndKitchen)}
           {renderSection(categories.snacksAndDrinks)}
           {renderSection(categories.beautyAndWellness)}
