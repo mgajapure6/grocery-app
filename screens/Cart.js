@@ -5,11 +5,11 @@ import {
   TouchableOpacity,
   StyleSheet,
   ScrollView,
-  Image,
   FlatList,
   Platform,
   Modal,
 } from 'react-native';
+import { Image } from 'expo-image';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Feather } from '@expo/vector-icons';
 import { CartContext } from '../contexts/CartContext';
@@ -88,6 +88,12 @@ export default function Cart({ navigation }) {
         console.log('Deleted payment method ID:', deletedPaymentMethodId);
       }
     });
+
+    // Preload images
+    Image.prefetch(
+      Object.values(cart).map((item) => item.image)
+    );
+
     return unsubscribe;
   }, [navigation, selectedAddress, selectedPaymentMethod, savedAddresses, savedPaymentMethods]);
 
@@ -298,7 +304,7 @@ export default function Cart({ navigation }) {
           </TouchableOpacity>
           <Text style={styles.headerTitle}>Your Cart</Text>
           <TouchableOpacity style={styles.cartContainer} onPress={() => console.log('Cart icon pressed')}>
-            <Feather name="shopping-cart" size={24} color="#5ac268" />
+            <Feather name="shopping-cart" size={24} color="#333" />
             <View style={styles.cartBadge}>
               <Text style={styles.cartBadgeText}>{validCart.length}</Text>
             </View>

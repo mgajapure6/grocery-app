@@ -1,4 +1,4 @@
-import React, { useContext, useState } from 'react';
+import React, { useContext, useState, useEffect } from 'react';
 import {
   View,
   Text,
@@ -6,10 +6,10 @@ import {
   TouchableOpacity,
   StyleSheet,
   ScrollView,
-  Image,
   FlatList,
   Platform
 } from 'react-native';
+import { Image } from 'expo-image';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Feather } from '@expo/vector-icons';
 import { CartContext } from '../contexts/CartContext';
@@ -22,12 +22,24 @@ export default function Homepage({ navigation }) {
   const [activeTab, setActiveTab] = useState('Home');
   const [selectedMainCategory, setSelectedMainCategory] = useState(categories.groceryAndKitchen);
 
-  const renderSubCategory = ({ item}) => (
+  useEffect(() => {
+    // Preload images
+    Image.prefetch(
+      Object.values(selectedMainCategory.subcategories).map((category) => category.image)
+    );
+  }, []);
+
+  const renderSubCategory = ({ item }) => (
     <TouchableOpacity
       style={styles.categoryCard}
       onPress={() => navigation.navigate('CategoryItems', { mainCategory: selectedMainCategory, subCategoryId: item.id })}
     >
-      <Image source={item.image} style={styles.categoryImage} />
+      <Image
+        source={item.image}
+        style={styles.categoryImage}
+        placeholder={require('../assets/img/image-placeholder.png')}
+        onError={(e) => console.log('ExpoImage error:', item.name, e)}
+      />
       <Text style={styles.categoryName}>{item.name}</Text>
     </TouchableOpacity>
   );
@@ -35,7 +47,11 @@ export default function Homepage({ navigation }) {
   const renderBestDealItem = ({ item }) => (
     <View style={styles.dealCard}>
       <TouchableOpacity onPress={() => navigation.navigate('ItemDetail', { item })}>
-        <Image source={item.image} style={styles.dealImage} />
+        <Image 
+          source={item.image} 
+          style={styles.dealImage} 
+          placeholder={require('../assets/img/image-placeholder.png')}
+        />
         <Text style={styles.dealName}>{item.name}</Text>
         <Text style={styles.dealPrice}>${item.price.toFixed(2)}</Text>
         {item.tag && (
@@ -57,7 +73,12 @@ export default function Homepage({ navigation }) {
   const renderSuggestedItem = ({ item }) => (
     <View style={styles.dealCard}>
       <TouchableOpacity onPress={() => navigation.navigate('ItemDetail', { item })}>
-        <Image source={item.image} style={styles.dealImage} />
+        <Image
+          source={item.image}
+          style={styles.dealImage}
+          placeholder={require('../assets/img/image-placeholder.png')}
+          onError={(e) => console.log('ExpoImage error:', item.name, e)}
+        />
         <Text style={styles.dealName}>{item.name}</Text>
         <Text style={styles.dealPrice}>${item.price.toFixed(2)}</Text>
         {item.tag && (
@@ -120,7 +141,12 @@ export default function Homepage({ navigation }) {
 
           {/* Banner */}
           <View style={styles.bannerContainer}>
-            <Image source={banner.image} style={styles.bannerImage} />
+            <Image
+              source={banner.image}
+              style={styles.bannerImage}
+              placeholder={require('../assets/img/image-placeholder.png')}
+              onError={(e) => console.log('ExpoImage error:', item.name, e)}
+            />
             {/* <View style={styles.bannerOverlay}>
               <Text style={styles.bannerTitle}>{banner.title}</Text>
               <Text style={styles.bannerSubtitle}>{banner.subtitle}</Text>
@@ -342,7 +368,6 @@ const styles = StyleSheet.create({
     width: '100%',
     height: 220,
     borderRadius: 12,
-    resizeMode: 'stretch',
   },
   bannerOverlay: {
     position: 'absolute',

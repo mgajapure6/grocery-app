@@ -47,6 +47,7 @@
         "projectId": "34683392-b56f-455c-a4f4-153f7ec0a8bd"
       }
     },
-    "owner": "mgajapure6"
+    "owner": "mgajapure6",
+    "assetBundlePatterns": ["assets/*"]
   }
 }

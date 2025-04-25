@@ -1,27 +1,24 @@
-const React = require('react');
-const {
-  useState,
-  useEffect,
-  useRef,
-} = React;
-const {
+import React, { useState, useEffect, useRef, useCallback,useContext } from 'react';
+import {
   View,
   Text,
   TouchableOpacity,
   StyleSheet,
   StatusBar,
-  Image,
   FlatList,
   ScrollView,
   Dimensions,
   Animated,
-} = require('react-native');
-const { SafeAreaView } = require('react-native-safe-area-context');
-const { Feather } = require('@expo/vector-icons');
+} from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import { Feather } from '@expo/vector-icons';
+import { Image } from 'expo-image';
+import { categories, suggestedItems } from '../data/staticData';
+import { CartContext } from '../contexts/CartContext';
 
 const { width } = Dimensions.get('window');
 
-module.exports = function ItemDetail({ navigation, route }) {
+export default function ItemDetail({ navigation, route }) {
   const item = route.params?.item || {
     id: '101-1',
     name: 'Lettuce',
@@ -47,7 +44,7 @@ module.exports = function ItemDetail({ navigation, route }) {
     createdAt: '2025-04-23T00:00:00.000Z',
     updatedAt: '2025-04-23T00:00:00.000Z',
   };
-
+  const { cart, setCart, addToCart } = useContext(CartContext);
   const [quantity, setQuantity] = useState(0);
   const [isAdded, setIsAdded] = useState(false);
   const [isFavorite, setIsFavorite] = useState(false);
@@ -55,23 +52,22 @@ module.exports = function ItemDetail({ navigation, route }) {
   const flatListRef = useRef(null);
   const buttonScale = useRef(new Animated.Value(1)).current;
 
-  // Dummy similar items
-  const similarItems = [
-    { id: '102-1', name: 'Tomato', price: 2.49, image: require('../assets/img/image-placeholder.png') },
-    { id: '103-1', name: 'Cucumber', price: 1.29, image: require('../assets/img/image-placeholder.png') },
-    { id: '104-1', name: 'Spinach', price: 1.99, image: require('../assets/img/image-placeholder.png') },
-    { id: '105-1', name: 'Carrot', price: 1.59, image: require('../assets/img/image-placeholder.png') },
-  ];
+  useEffect(() => {
+    // Preload images
+    Image.prefetch([item.image]);
+    Image.prefetch(item.images);
+    Image.prefetch(Object.values(suggestedItems).map((item) => item.image));
+  }, [item.image, item.images]);
 
   // Handle image slider scroll
-  const onScroll = (event) => {
+  const onScroll = useCallback((event) => {
     const contentOffsetX = event.nativeEvent.contentOffset.x;
     const index = Math.round(contentOffsetX / width);
     setActiveImageIndex(index);
-  };
+  }, []);
 
   // Animate button press
-  const animateButton = () => {
+  const animateButton = useCallback(() => {
     Animated.sequence([
       Animated.spring(buttonScale, {
         toValue: 0.95,
@@ -82,87 +78,97 @@ module.exports = function ItemDetail({ navigation, route }) {
         useNativeDriver: true,
       }),
     ]).start();
-  };
+  }, [buttonScale]);
 
   // Handle add to cart
-  const handleAddToCart = () => {
+  const handleAddToCart = useCallback(() => {
     setIsAdded(true);
     setQuantity(1);
+    addToCart(item);
     animateButton();
     console.log('Added to Cart:', { id: item.id, quantity: 1 });
-  };
+  }, [animateButton, item.id]);
+
+  const handleMinQuantity = useCallback(() => {
+    console.log("quantity:", quantity)
+    if (quantity == 1) {
+      setIsAdded(false);
+      setQuantity(0);
+      setCart((prev) => prev.filter((item) => item.id !== id));
+    } else {
+      setQuantity(quantity - 1);
+    }
+  });
+
+  const handlePlusQuantity = useCallback(()=>{
+    setQuantity(quantity+1)
+  });
 
   // Render pagination dots
-  const renderPagination = () => (
-    <View style={styles.pagination}>
-      {item.images.map((_, index) => (
-        <Animated.View
-          key={index}
-          style={[
-            styles.dot,
-            activeImageIndex === index ? styles.activeDot : styles.inactiveDot,
-            {
-              transform: [{
-                scale: activeImageIndex === index ? 1.2 : 1,
-              }],
-              opacity: activeImageIndex === index ? 1 : 0.6,
-            },
-          ]}
-        />
-      ))}
-    </View>
+  const renderPagination = useCallback(
+    () => (
+      <View style={styles.pagination}>
+        {item.images.map((_, index) => (
+          <Animated.View
+            key={index}
+            style={[
+              styles.dot,
+              activeImageIndex === index ? styles.activeDot : styles.inactiveDot,
+              {
+                transform: [{ scale: activeImageIndex === index ? 1.2 : 1 }],
+                opacity: activeImageIndex === index ? 1 : 0.6,
+              },
+            ]}
+          />
+        ))}
+      </View>
+    ),
+    [activeImageIndex, item.images]
   );
 
-  // Render star rating
-  const renderStars = (rating) => {
-    const stars = [];
-    for (let i = 1; i <= 5; i++) {
-      stars.push(
-        <Feather
-          key={i}
-          name="star"
-          size={18}
-          color={i <= Math.round(rating) ? '#f5c518' : '#ccc'}
-          style={styles.star}
-        />
-      );
-    }
-    return stars;
-  };
-
   // Render similar item
-  const renderSimilarItem = ({ item }) => (
-    <TouchableOpacity
-      style={styles.similarItemCard}
-      onPress={() => console.log('View item:', item.id)}
-    >
-      <Image source={item.image} style={styles.similarItemImage} resizeMode="cover" />
-      <Text style={styles.similarItemName}>{item.name}</Text>
-      <Text style={styles.similarItemPrice}>${item.price.toFixed(2)}</Text>
-    </TouchableOpacity>
+  const renderSuggestedItem = useCallback(
+    ({ item }) => (
+      <TouchableOpacity
+        style={styles.similarItemCard}
+        onPress={() => console.log('View item:', item.id)}
+      >
+        <Image
+          source={item.image}
+          style={styles.similarItemImage}
+          contentFit="cover"
+        />
+        <Text style={styles.similarItemName}>{item.name}</Text>
+        <Text style={styles.similarItemPrice}>${item.price.toFixed(2)}</Text>
+      </TouchableOpacity>
+    ),
+    []
   );
 
   // Render quantity selector
-  const renderQuantitySelector = () => (
-    <View style={styles.quantitySelector}>
-      <TouchableOpacity
-        style={styles.quantityButton}
-        onPress={() => setQuantity(Math.max(1, quantity - 1))}
-      >
-        <Feather name="minus" size={20} color="#333" />
-      </TouchableOpacity>
-      <Text style={styles.quantityText}>{quantity}</Text>
-      <TouchableOpacity
-        style={styles.quantityButton}
-        onPress={() => setQuantity(quantity + 1)}
-      >
-        <Feather name="plus" size={20} color="#333" />
-      </TouchableOpacity>
-    </View>
+  const renderQuantitySelector = useCallback(
+    () => (
+      <View style={styles.quantitySelector}>
+        <TouchableOpacity
+          style={styles.quantityButtonMinus}
+          onPress={() => handleMinQuantity()}
+        >
+          <Feather name="minus" size={20} color="#fff" />
+        </TouchableOpacity>
+        <Text style={styles.quantityText}>{quantity}</Text>
+        <TouchableOpacity
+          style={styles.quantityButtonPlus}
+          onPress={() => handlePlusQuantity()}
+        >
+          <Feather name="plus" size={20} color="#fff" />
+        </TouchableOpacity>
+      </View>
+    ),
+    [quantity]
   );
 
   return (
-    <SafeAreaView style={styles.safeArea} edges={['top', 'left', 'right', 'bottom']}>
+    <SafeAreaView style={styles.safeArea} edges={['top', 'left', 'right']}>
       <StatusBar backgroundColor="#fff" barStyle="dark-content" />
       <View style={styles.container}>
         {/* Header */}
@@ -173,11 +179,11 @@ module.exports = function ItemDetail({ navigation, route }) {
           <View style={styles.titleContainer}>
             <Text style={styles.title}>Item Details</Text>
           </View>
-          <TouchableOpacity onPress={() => console.log('View Cart')}>
+          <TouchableOpacity onPress={() => navigation.navigate('Cart')}>
             <View style={styles.cartContainer}>
               <Feather name="shopping-cart" size={24} color="#333" />
               <View style={styles.cartBadge}>
-                <Text style={styles.cartBadgeText}>2</Text>
+                <Text style={styles.cartBadgeText}>{cart.length}</Text>
               </View>
             </View>
           </TouchableOpacity>
@@ -195,7 +201,11 @@ module.exports = function ItemDetail({ navigation, route }) {
               showsHorizontalScrollIndicator={false}
               keyExtractor={(_, index) => index.toString()}
               renderItem={({ item: image }) => (
-                <Image source={image} style={styles.image} resizeMode="cover" />
+                <Image
+                  source={image}
+                  style={styles.image}
+                  contentFit="cover"
+                />
               )}
               onScroll={onScroll}
               scrollEventThrottle={16}
@@ -217,10 +227,17 @@ module.exports = function ItemDetail({ navigation, route }) {
               </TouchableOpacity>
             </View>
             <View style={styles.priceRatingRow}>
-              <Text style={styles.price}>${item.price.toFixed(2)} / {item.unit}</Text>
+              <Text style={styles.price}>
+                ${item.price.toFixed(2)} / {item.unit}
+              </Text>
               <View style={styles.ratingContainer}>
-                {renderStars(item.rating)}
-                <Text style={styles.reviews}>({item.reviews})</Text>
+                <Text style={styles.rating}>{item.rating}</Text>
+                <Feather
+                  name="star"
+                  size={18}
+                  style={styles.star}
+                />
+                <Text style={styles.reviews}>({item.reviews.length})</Text>
               </View>
             </View>
             <Text style={styles.description}>{item.description}</Text>
@@ -234,7 +251,12 @@ module.exports = function ItemDetail({ navigation, route }) {
             </View>
             <View style={styles.infoRow}>
               <Text style={styles.infoLabel}>Availability:</Text>
-              <Text style={[styles.infoValue, { color: item.isAvailable ? '#5ac268' : '#ff3b30' }]}>
+              <Text
+                style={[
+                  styles.infoValue,
+                  { color: item.isAvailable ? '#5ac268' : '#ff3b30' },
+                ]}
+              >
                 {item.isAvailable ? `In Stock (${item.stock})` : 'Out of Stock'}
               </Text>
             </View>
@@ -254,7 +276,8 @@ module.exports = function ItemDetail({ navigation, route }) {
             <View style={styles.detailRow}>
               <Text style={styles.detailLabel}>Dimensions:</Text>
               <Text style={styles.detailValue}>
-                {item.dimensions.length} x {item.dimensions.width} x {item.dimensions.height} cm
+                {item.dimensions.length} x {item.dimensions.width} x{' '}
+                {item.dimensions.height} cm
               </Text>
             </View>
             <View style={styles.detailRow}>
@@ -279,11 +302,11 @@ module.exports = function ItemDetail({ navigation, route }) {
           <View style={styles.similarItemsCard}>
             <Text style={styles.sectionTitle}>Similar Items</Text>
             <FlatList
-              data={similarItems}
+              data={suggestedItems}
               horizontal
               showsHorizontalScrollIndicator={false}
               keyExtractor={(item) => item.id}
-              renderItem={renderSimilarItem}
+              renderItem={renderSuggestedItem}
               contentContainerStyle={styles.similarItemsList}
             />
           </View>
@@ -291,7 +314,9 @@ module.exports = function ItemDetail({ navigation, route }) {
 
         {/* Bottom Navigation */}
         <View style={styles.bottomNav}>
-          <Animated.View style={[styles.buttonContainer, { transform: [{ scale: buttonScale }] }]}>
+          <Animated.View
+            style={[styles.buttonContainer, { transform: [{ scale: buttonScale }] }]}
+          >
             {isAdded ? (
               renderQuantitySelector()
             ) : (
@@ -311,7 +336,7 @@ module.exports = function ItemDetail({ navigation, route }) {
           </Animated.View>
           <TouchableOpacity
             style={styles.viewCartButton}
-            onPress={() => console.log('View Cart')}
+            onPress={() => navigation.navigate('Cart')}
           >
             <Text style={styles.viewCartButtonText}>View Cart</Text>
           </TouchableOpacity>
@@ -355,7 +380,7 @@ const styles = StyleSheet.create({
     position: 'absolute',
     top: -8,
     right: -8,
-    backgroundColor: '#ff3b30',
+    backgroundColor: '#5ac268',
     borderRadius: 10,
     width: 18,
     height: 18,
@@ -377,8 +402,6 @@ const styles = StyleSheet.create({
   image: {
     width: width,
     height: 300,
-    // borderBottomLeftRadius: 16,
-    // borderBottomRightRadius: 16,
   },
   gradientOverlay: {
     position: 'absolute',
@@ -386,9 +409,7 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     height: 80,
-    backgroundColor: 'rgba(s0, 0, 0, 0.3)',
-    // borderBottomLeftRadius: 16,
-    // borderBottomRightRadius: 16,
+    backgroundColor: 'rgba(0, 0, 0, 0.3)',
   },
   pagination: {
     position: 'absolute',
@@ -445,9 +466,13 @@ const styles = StyleSheet.create({
   ratingContainer: {
     flexDirection: 'row',
     alignItems: 'center',
+    justifyContent: 'center'
+  },
+  rating:{
+    marginRight: 4
   },
   star: {
-    marginRight: 4,
+    marginRight: 0,
   },
   reviews: {
     fontSize: 14,
@@ -558,7 +583,10 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    padding: 15,
+    paddingTop: 10,
+    paddingBottom: 20,
+    paddingHorizontal: 22,
+    // paddingBottom: 30,
     backgroundColor: '#fff',
     borderTopWidth: 1,
     borderTopColor: '#ddd',
@@ -574,12 +602,12 @@ const styles = StyleSheet.create({
   },
   addButton: {
     backgroundColor: '#5ac268',
-    paddingVertical: 12,
+    paddingVertical: 15,
     borderRadius: 10,
     alignItems: 'center',
   },
   addButtonDisabled: {
-    backgroundColor: '#ccc',
+    backgroundColor: '#fff',
   },
   addButtonText: {
     fontSize: 16,
@@ -590,9 +618,9 @@ const styles = StyleSheet.create({
     flex: 1,
     borderWidth: 1,
     borderColor: '#007aff',
-    paddingVertical: 12,
     borderRadius: 10,
     alignItems: 'center',
+    paddingVertical: 15,
   },
   viewCartButtonText: {
     fontSize: 16,
@@ -603,15 +631,22 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: '#f5f5f5',
-    borderRadius: 10,
-    paddingVertical: 6,
-  },
-  quantityButton: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
     backgroundColor: '#fff',
+  },
+  quantityButtonMinus: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: 'red',
+    justifyContent: 'center',
+    alignItems: 'center',
+    elevation: 2,
+  },
+  quantityButtonPlus: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: '#007aff',
     justifyContent: 'center',
     alignItems: 'center',
     elevation: 2,

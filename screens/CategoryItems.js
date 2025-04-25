@@ -1,13 +1,13 @@
-import React, { useContext, useState } from 'react';
+import React, { useContext, useState, useEffect } from 'react';
 import {
   View,
   Text,
   TouchableOpacity,
   StyleSheet,
   FlatList,
-  Image,
   Platform,
 } from 'react-native';
+import { Image } from 'expo-image';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Feather } from '@expo/vector-icons';
 import { CartContext } from '../contexts/CartContext';
@@ -15,7 +15,7 @@ import { categories } from '../data/staticData';
 import { FontAwesome } from '@expo/vector-icons'
 
 export default function CategoryItems({ navigation, route }) {
-  const { addToCart, cart } = useContext(CartContext);
+  const { cart, setCart, addToCart } = useContext(CartContext);
   const { mainCategory, subCategoryId } = route.params;
   const [selectedSubCategoryId, setSelectedSubCategoryId] = useState(subCategoryId);
 
@@ -23,6 +23,13 @@ export default function CategoryItems({ navigation, route }) {
   const subCategories = mainCategory.subcategories || [];
   const selectedSubCategory = subCategories.find(sub => sub.id === selectedSubCategoryId);
   const items = selectedSubCategory ? selectedSubCategory.items : [];
+
+  useEffect(() => {
+    // Preload images
+    Image.prefetch(
+      Object.values(subCategories).map((category) => category.image)
+    );
+  }, []);
 
   // Render subcategory in left column
   const renderSubCategoryItem = ({ item }) => (
@@ -107,14 +114,14 @@ export default function CategoryItems({ navigation, route }) {
                 style={styles.filterButton}
                 onPress={() => console.log('Filter pressed')}
               >
-                <FontAwesome name='filter' size={15} color="#5ac268"/>
+                <FontAwesome name='filter' size={15} color="#5ac268" />
                 <Text style={styles.filterText}>Filter</Text>
               </TouchableOpacity>
               <TouchableOpacity
                 style={styles.sortButton}
                 onPress={() => console.log('Sort pressed')}
               >
-                <FontAwesome name='sort' size={15} color="#5ac268"/>
+                <FontAwesome name='sort' size={15} color="#5ac268" />
                 <Text style={styles.sortText}>Sort</Text>
               </TouchableOpacity>
             </View>

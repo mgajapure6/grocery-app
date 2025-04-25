@@ -1,14 +1,14 @@
-import React, { useContext, useState } from 'react';
+import React, { useContext, useState, useEffect } from 'react';
 import {
   View,
   Text,
   TouchableOpacity,
   StyleSheet,
   ScrollView,
-  Image,
   FlatList,
   Platform,
 } from 'react-native';
+import { Image } from 'expo-image';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Feather } from '@expo/vector-icons';
 import { CartContext } from '../contexts/CartContext';
@@ -18,12 +18,21 @@ export default function Categories({ navigation }) {
   const { cart } = useContext(CartContext);
   const [activeTab, setActiveTab] = useState('Categories');
 
+  useEffect(() => {
+      // Preload images
+      Image.prefetch(
+        Object.values(categories).flatMap((category) =>
+          category.subcategories.map((subcategory) => subcategory.image)
+        )
+      );
+    }, []);
+
   const renderCategoryItem = ({ item, mainCategory }) => (
     <TouchableOpacity
       style={styles.categoryCard}
       onPress={() => navigation.navigate('CategoryItems', { mainCategory, subCategoryId: item.id })}
     >
-      <Image source={item.image} style={styles.categoryImage} />
+      <Image source={item.image} style={styles.categoryImage} placeholder={require('../assets/img/image-placeholder.png')}/>
       <Text style={styles.categoryName}>{item.name}</Text>
     </TouchableOpacity>
   );
