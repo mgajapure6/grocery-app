@@ -5,12 +5,12 @@ import {
   TouchableOpacity,
   StyleSheet,
   ScrollView,
-  Image,
   Alert,
   FlatList,
   Modal,
   TextInput,
 } from 'react-native';
+import { Image } from 'expo-image';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Feather } from '@expo/vector-icons';
 import * as ImagePicker from 'expo-image-picker';
@@ -180,7 +180,7 @@ const AdminItemDetail = ({ route, navigation }) => {
 
   const renderImageItem = ({ item }) => (
     <View style={styles.imageContainer}>
-      <Image source={{ uri: item }} style={styles.thumbnailImage} />
+      <Image source={item} style={styles.thumbnailImage} />
       <View style={styles.imageActionButtonContainer}>
         <TouchableOpacity
           style={styles.imageActionButton}
