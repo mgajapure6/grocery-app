@@ -277,7 +277,7 @@ const AdminDashboard = ({ navigation }) => {
       <View className="flex-1 bg-gray-100">
         <ScrollView contentContainerStyle={{ padding: 10, paddingBottom: 50 }}>
           {/* Sales Overview */}
-          <View className="bg-white rounded-xl p-2 mb-4">
+          <View className="bg-white rounded-xl p-4 mb-4">
             <View className="flex-row justify-between items-center mb-4">
               <Text className="text-lg font-bold text-gray-800">Sales Overview</Text>
               <TouchableOpacity
@@ -296,7 +296,7 @@ const AdminDashboard = ({ navigation }) => {
             <Text className="text-sm font-semibold text-gray-800 mt-4 mb-2">Sales Trends</Text>
             <LineChart
               data={salesChartData}
-              width={screenWidth - 80}
+              width={screenWidth - 50}
               height={220}
               chartConfig={{
                 backgroundColor: '#fff',
@@ -313,7 +313,7 @@ const AdminDashboard = ({ navigation }) => {
           </View>
 
           {/* Order Statistics */}
-          <View className="bg-white rounded-xl p-2 mb-4">
+          <View className="bg-white rounded-xl p-4 mb-4">
             <View className="flex-row justify-between items-center mb-4">
               <Text className="text-lg font-bold text-gray-800">Order Statistics</Text>
               <TouchableOpacity
@@ -349,7 +349,7 @@ const AdminDashboard = ({ navigation }) => {
           </View>
 
           {/* Customer Insights */}
-          <View className="bg-white rounded-xl p-2 mb-4">
+          <View className="bg-white rounded-xl p-4 mb-4">
             <View className="flex-row justify-between items-center mb-4">
               <Text className="text-lg font-bold text-gray-800">Customer Insights</Text>
               <TouchableOpacity
@@ -382,7 +382,7 @@ const AdminDashboard = ({ navigation }) => {
           </View>
 
           {/* Product Performance */}
-          <View className="bg-white rounded-xl p-2 mb-4">
+          <View className="bg-white rounded-xl p-4 mb-4">
             <Text className="text-lg font-bold text-gray-800 mb-4">Product Performance</Text>
             <Text className="text-sm font-semibold text-gray-800 mb-2">Top Selling Products</Text>
             <FlatList
@@ -420,7 +420,7 @@ const AdminDashboard = ({ navigation }) => {
           </View>
 
           {/* Website/App Performance */}
-          <View className="bg-white rounded-xl p-2 mb-4">
+          <View className="bg-white rounded-xl p-4 mb-4">
             <Text className="text-lg font-bold text-gray-800 mb-4">Website/App Performance</Text>
             <View className="flex-row justify-between">
               {renderKPI({ title: 'Visits', value: websitePerformance.visits })}
@@ -446,7 +446,7 @@ const AdminDashboard = ({ navigation }) => {
           </View>
 
           {/* Recent Activities and Notifications */}
-          <View className="bg-white rounded-xl p-2 mb-4">
+          <View className="bg-white rounded-xl p-4 mb-4">
             <Text className="text-lg font-bold text-gray-800 mb-4">Recent Activities</Text>
             <Text className="text-sm font-semibold text-gray-800 mb-2">Recent Orders</Text>
             <FlatList
@@ -491,7 +491,7 @@ const AdminDashboard = ({ navigation }) => {
           </View>
 
           {/* Quick Actions and Shortcuts */}
-          <View className="bg-white rounded-xl p-2">
+          <View className="bg-white rounded-xl p-4">
             <Text className="text-lg font-bold text-gray-800 mb-4">Quick Actions</Text>
             <View className="flex-row items-center border border-gray-300 rounded-lg p-3 mb-4">
               <TextInput
