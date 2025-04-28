@@ -7,11 +7,12 @@ import { Feather } from '@expo/vector-icons';
 import AdminDashboard from './Dashboard';
 import AdminProducts from './AdminCategories';
 import AdminOrders from './Orders';
-import AdminUsers from './Users';
+import AdminUsers from './AdminUsers';
 import AdminMore from './More';
 import AdminProductAddUpdate from './ProductForm';
 import AdminProductList from './AdminProductList';
 import AdminItemDetail from './AdminItemDetail';
+import AdminUserDetail from './AdminUserDetail';
 
 
 const AdminTab = createBottomTabNavigator();
@@ -81,6 +82,7 @@ export default function AdminNavigator({ navigation }) {
         <AdminStack.Screen name="AdminProductAddUpdate" component={AdminProductAddUpdate} />
         <AdminStack.Screen name="AdminProductList" component={AdminProductList} />
         <AdminStack.Screen name="AdminItemDetail" component={AdminItemDetail} />
+        <AdminStack.Screen name="AdminUserDetail" component={AdminUserDetail} />
       </AdminStack.Navigator>
   );
 }

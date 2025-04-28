@@ -39,7 +39,7 @@ const AdminProductList = ({ route, navigation }) => {
   );
 
   return (
-    <SafeAreaView style={styles.safeArea} edges={['top', 'left', 'right']}>
+    <SafeAreaView style={styles.safeArea} edges={['left', 'right']}>
       <View style={styles.container}>
         <View style={styles.header}>
           <TouchableOpacity
