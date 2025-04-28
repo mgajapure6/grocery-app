@@ -4,12 +4,11 @@ import { createStackNavigator } from '@react-navigation/stack';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import { Feather } from '@expo/vector-icons';
 
-import AdminDashboard from './Dashboard';
+import AdminDashboard from './AdminDashboard';
 import AdminProducts from './AdminCategories';
 import AdminOrders from './Orders';
 import AdminUsers from './AdminUsers';
-import AdminMore from './More';
-import AdminProductAddUpdate from './ProductForm';
+import AdminMore from './AdminMore';
 import AdminProductList from './AdminProductList';
 import AdminItemDetail from './AdminItemDetail';
 import AdminUserDetail from './AdminUserDetail';
@@ -79,7 +78,6 @@ export default function AdminNavigator({ navigation }) {
   return (
       <AdminStack.Navigator initialRouteName="AdminMain" screenOptions={{ headerShown: false }}>
         <AdminStack.Screen name="AdminMain" component={TabNavigator} />
-        <AdminStack.Screen name="AdminProductAddUpdate" component={AdminProductAddUpdate} />
         <AdminStack.Screen name="AdminProductList" component={AdminProductList} />
         <AdminStack.Screen name="AdminItemDetail" component={AdminItemDetail} />
         <AdminStack.Screen name="AdminUserDetail" component={AdminUserDetail} />
