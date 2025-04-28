@@ -52,6 +52,7 @@ const generateStaticData = () => {
         rating: Math.floor(Math.random() * 5) + 1,
         comment: `Review for Product ${i + 1}`,
         createdAt: getRandomDate(30),
+        reviewId: `REV${i}_${Math.random().toString(36).substr(2, 9)}`, // Unique review ID
       }
     ] : [],
   }));
@@ -66,8 +67,19 @@ const reviews = products
   .slice(0, 10);
 
 const screenWidth = Dimensions.get('window').width;
+const chartWidth = screenWidth - 40; // Standardized padding
 
 const AdminDashboard = ({ navigation }) => {
+  // Validate navigation prop
+  if (!navigation) {
+    console.error('Navigation prop is undefined. Ensure component is wrapped in a NavigationContainer.');
+    return (
+      <SafeAreaView className="flex-1 bg-white">
+        <Text className="text-red-600 p-4">Error: Navigation is not available.</Text>
+      </SafeAreaView>
+    );
+  }
+
   const [salesTimeframe, setSalesTimeframe] = useState('This Month');
   const [orderTimeframe, setOrderTimeframe] = useState('This Month');
   const [customerTimeframe, setCustomerTimeframe] = useState('This Month');
@@ -139,16 +151,17 @@ const AdminDashboard = ({ navigation }) => {
 
   // Chart data
   const salesChartData = {
-    labels: ['Day 1', 'Day 5', 'Day 10', 'Day 15', 'Day 20', 'Day 25', 'Day 30'],
+    labels: ['Day 1', 'Day 2', 'Day 3', 'Day 4', 'Day 5', 'Day 6', 'Day 7'],
     datasets: [{
       data: orders
-        .filter(order => new Date(order.orderDate) >= new Date(new Date().setDate(new Date().getDate() - 30)))
+        .filter(order => new Date(order.orderDate) >= new Date(new Date().setDate(new Date().getDate() - 7)))
         .reduce((acc, order) => {
           const day = Math.floor((new Date() - new Date(order.orderDate)) / (1000 * 60 * 60 * 24));
-          acc[29 - day] = (acc[29 - day] || 0) + order.totalAmount;
+          if (day >= 0 && day < 7) {
+            acc[6 - day] = (acc[6 - day] || 0) + order.totalAmount;
+          }
           return acc;
-        }, Array(30).fill(0))
-        .slice(-7),
+        }, Array(7).fill(0)),
     }],
   };
 
@@ -165,15 +178,27 @@ const AdminDashboard = ({ navigation }) => {
     }],
   };
 
-  const customerChartData = {
-    data: [
-      { name: 'Active', value: customerKPIs.activeCustomers, color: '#007bff' },
-      { name: 'Inactive', value: customerKPIs.totalCustomers - customerKPIs.activeCustomers, color: '#6c757d' },
-    ],
-  };
+  const customerChartData = [
+    {
+      name: 'Active',
+      population: customerKPIs.activeCustomers,
+      color: '#007bff',
+      legendFontColor: '#333',
+      legendFontSize: 12,
+    },
+    {
+      name: 'Inactive',
+      population: Math.max(0, customerKPIs.totalCustomers - customerKPIs.activeCustomers),
+      color: '#6c757d',
+      legendFontColor: '#333',
+      legendFontSize: 12,
+    },
+  ];
 
   const conversionChartData = {
+    labels: ['Conversion Rate'],
     data: [0.025], // 2.5% conversion rate
+    colors: ['#007bff'],
   };
 
   // Product Performance
@@ -250,6 +275,7 @@ const AdminDashboard = ({ navigation }) => {
     <TouchableOpacity
       className="py-3 border-b border-gray-200"
       onPress={onPress}
+      accessibilityLabel={`View ${type} details`}
     >
       <View className="flex-row justify-between items-center">
         <View>
@@ -283,6 +309,7 @@ const AdminDashboard = ({ navigation }) => {
               <TouchableOpacity
                 className="flex-row items-center border border-gray-300 rounded-lg p-2"
                 onPress={() => showTimeframeDialog('sales', setSalesTimeframe)}
+                accessibilityLabel="Select sales timeframe"
               >
                 <Text className="text-base text-gray-800">{salesTimeframe}</Text>
                 <Feather name="chevron-down" size={20} color="#333" />
@@ -296,7 +323,7 @@ const AdminDashboard = ({ navigation }) => {
             <Text className="text-sm font-semibold text-gray-800 mt-4 mb-2">Sales Trends</Text>
             <LineChart
               data={salesChartData}
-              width={screenWidth - 50}
+              width={chartWidth}
               height={220}
               chartConfig={{
                 backgroundColor: '#fff',
@@ -319,6 +346,7 @@ const AdminDashboard = ({ navigation }) => {
               <TouchableOpacity
                 className="flex-row items-center border border-gray-300 rounded-lg p-2"
                 onPress={() => showTimeframeDialog('orders', setOrderTimeframe)}
+                accessibilityLabel="Select order timeframe"
               >
                 <Text className="text-base text-gray-800">{orderTimeframe}</Text>
                 <Feather name="chevron-down" size={20} color="#333" />
@@ -334,7 +362,7 @@ const AdminDashboard = ({ navigation }) => {
             <Text className="text-sm font-semibold text-gray-800 mt-4 mb-2">Order Status Breakdown</Text>
             <BarChart
               data={orderChartData}
-              width={screenWidth - 80}
+              width={chartWidth}
               height={220}
               chartConfig={{
                 backgroundColor: '#fff',
@@ -355,6 +383,7 @@ const AdminDashboard = ({ navigation }) => {
               <TouchableOpacity
                 className="flex-row items-center border border-gray-300 rounded-lg p-2"
                 onPress={() => showTimeframeDialog('customers', setCustomerTimeframe)}
+                accessibilityLabel="Select customer timeframe"
               >
                 <Text className="text-base text-gray-800">{customerTimeframe}</Text>
                 <Feather name="chevron-down" size={20} color="#333" />
@@ -367,14 +396,14 @@ const AdminDashboard = ({ navigation }) => {
             </View>
             <Text className="text-sm font-semibold text-gray-800 mt-4 mb-2">Customer Activity</Text>
             <PieChart
-              data={customerChartData.data}
-              width={screenWidth - 80}
+              data={customerChartData}
+              width={chartWidth}
               height={220}
               chartConfig={{
                 color: (opacity = 1) => `rgba(0, 123, 255, ${opacity})`,
                 labelColor: (opacity = 1) => `rgba(51, 51, 51, ${opacity})`,
               }}
-              accessor="value"
+              accessor="population"
               backgroundColor="transparent"
               paddingLeft="15"
               style={{ marginVertical: 8 }}
@@ -430,7 +459,7 @@ const AdminDashboard = ({ navigation }) => {
             <Text className="text-sm font-semibold text-gray-800 mt-4 mb-2">Conversion Rate</Text>
             <ProgressChart
               data={conversionChartData}
-              width={screenWidth - 80}
+              width={chartWidth}
               height={220}
               strokeWidth={16}
               radius={60}
@@ -465,7 +494,7 @@ const AdminDashboard = ({ navigation }) => {
               renderItem={({ item }) => renderListItem({
                 item,
                 type: 'user',
-                onPress: () => navigation.navigate('AdminUserDetail', { user: item, users, setUsers: () => {} })
+                onPress: () => navigation.navigate('AdminUserDetail', { user: item, users })
               })}
               keyExtractor={item => item.uid}
               ListEmptyComponent={<Text className="text-gray-600 text-center">No customers</Text>}
@@ -485,7 +514,7 @@ const AdminDashboard = ({ navigation }) => {
             <FlatList
               data={reviews}
               renderItem={({ item }) => renderListItem({ item, type: 'review' })}
-              keyExtractor={(item, index) => index.toString()}
+              keyExtractor={item => item.reviewId || `${item.createdAt}_${item.rating}`}
               ListEmptyComponent={<Text className="text-gray-600 text-center">No reviews</Text>}
             />
           </View>
@@ -501,32 +530,36 @@ const AdminDashboard = ({ navigation }) => {
                 placeholder="Search orders, customers, products..."
                 accessibilityLabel="Search input"
               />
-              <TouchableOpacity onPress={handleSearch}>
+              <TouchableOpacity onPress={handleSearch} accessibilityLabel="Search button">
                 <Feather name="search" size={20} color="#333" />
               </TouchableOpacity>
             </View>
             <View className="flex-row flex-wrap justify-between">
               <TouchableOpacity
                 className="flex-1 bg-blue-600 py-3 rounded-lg items-center mx-1 mb-2"
-                onPress={() => navigation.navigate('AdminItemDetail', {})}
+                onPress={() => navigation.navigate('AdminItemDetail', { item: { id: '', name: '', stock: 0, price: 0, createdAt: new Date().toISOString(), sales: 0, reviews: [] } })}
+                accessibilityLabel="Add new product"
               >
                 <Text className="text-white text-base font-semibold">Add New Product</Text>
               </TouchableOpacity>
               <TouchableOpacity
                 className="flex-1 bg-blue-600 py-3 rounded-lg items-center mx-1 mb-2"
                 onPress={() => navigation.navigate('AdminOrders')}
+                accessibilityLabel="View all orders"
               >
                 <Text className="text-white text-base font-semibold">View All Orders</Text>
               </TouchableOpacity>
               <TouchableOpacity
                 className="flex-1 bg-blue-600 py-3 rounded-lg items-center mx-1 mb-2"
-                onPress={() => navigation.navigate('AdminUserDetail', { users, setUsers: () => {} })}
+                onPress={() => navigation.navigate('AdminUserDetail', { users })}
+                accessibilityLabel="Manage users"
               >
                 <Text className="text-white text-base font-semibold">Manage Users</Text>
               </TouchableOpacity>
               <TouchableOpacity
                 className="flex-1 bg-blue-600 py-3 rounded-lg items-center mx-1 mb-2"
                 onPress={() => navigation.navigate('AdminOrders', { filter: 'New' })}
+                accessibilityLabel="Process new orders"
               >
                 <Text className="text-white text-base font-semibold">Process New Orders</Text>
               </TouchableOpacity>

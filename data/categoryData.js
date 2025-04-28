@@ -5452,7 +5452,7 @@ export const categories = {
     },
     householdAndLifestyle: {
         id: "cat-4",
-        name: "householdAndLifestyle",
+        name: "Household And Lifestyle",
         key: "householdAndLifestyle",
         iconName: "home",
         subcategories: [
