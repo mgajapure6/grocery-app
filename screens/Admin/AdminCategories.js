@@ -474,7 +474,7 @@ export default function AdminCategories({ navigation }) {
     const hasSubcategories = mainCategory.subcategories && mainCategory.subcategories.length > 0;
 
     return (
-      <View key={mainCategory.id} className="mb-3 bg-white rounded-lg shadow-sm overflow-hidden">
+      <View key={mainCategory.id} className="bg-white shadow-sm overflow-hidden">
         <TouchableOpacity
           className="flex-row items-center justify-between p-4 border-b border-gray-200"
           onPress={() => handleToggleCollapse(mainCategory.id)}
@@ -737,10 +737,9 @@ export default function AdminCategories({ navigation }) {
   };
 
   return (
-    <SafeAreaView className="flex-1 bg-gray-100">
-      <View className="px-4 pt-4 pb-2 bg-white border-b border-gray-200 shadow-sm">
+    <SafeAreaView className="flex-1 bg-gray-100" edges={['left', 'right']}>
         {/* <Text className="text-2xl font-bold text-gray-800 mb-4">Category Management</Text> */}
-        <View className="flex-row items-center" style={{paddingVertical: 10}}>
+        <View className="flex-row items-center p-3 bg-white border-b border-gray-200">
           <View className="flex-1 flex-row items-center border border-gray-300 rounded-lg px-3 py-2 bg-gray-50 mr-2">
             <Feather name="search" size={20} color="#6b7280" />
             <TextInput
@@ -758,10 +757,9 @@ export default function AdminCategories({ navigation }) {
             accessibilityRole="button"
             accessibilityLabel="Sort options"
           >
-            <Feather name="sort-alpha" size={20} color="#374151" />
+            <Feather name="chevrons-up" size={20} color="#374151" />
           </TouchableOpacity>
         </View>
-      </View>
       {loading && !modalVisible ? (
         <View className="flex-1 justify-center items-center">
           <ActivityIndicator size="large" color="#0000ff" />
@@ -783,8 +781,8 @@ export default function AdminCategories({ navigation }) {
           data={filteredAndSortedMainCategories}
           renderItem={renderMainCategoryItem}
           keyExtractor={item => item.id}
-          className="flex-1 p-4"
-          contentContainerStyle={{ paddingBottom: 80 }}
+          className="flex-1"
+          contentContainerStyle={{ paddingBottom: 50 }}
         />
       )}
       <TouchableOpacity

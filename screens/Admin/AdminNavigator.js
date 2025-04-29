@@ -5,8 +5,7 @@ import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import { Feather } from '@expo/vector-icons';
 
 import AdminDashboard from './AdminDashboard';
-import AdminDashboard2 from './AdminDashboard2';
-import AdminProducts from './AdminCategories';
+import AdminCategories from './AdminCategories';
 import AdminOrders from './AdminOrders';
 import AdminUsers from './AdminUsers';
 import AdminMore from './AdminMore';
@@ -20,8 +19,7 @@ const AdminStack = createStackNavigator();
 
 const tabs = {
   dashboard: {name: "AdminDashboard", title: "Dashboard", icon: "pie-chart"},
-  dashboard2: {name: "AdminDashboard2", title: "Dashboard", icon: "pie-chart"},
-  products: {name: "AdminProducts", title: "Products", icon: "archive"},
+  categories: {name: "AdminCategories", title: "Categories", icon: "archive"},
   orders: {name: "AdminOrders", title: "Orders", icon: "book-open"},
   users: {name: "AdminUsers", title: "Users", icon: "users"},
   more: {name: "AdminMore", title: "More", icon: "more-horizontal"},
@@ -43,8 +41,7 @@ function TabNavigator() {
         tabBarIcon: ({ color, size }) => {
           let iconName;
           if (route.name === tabs.dashboard.title) iconName = tabs.dashboard.icon;
-          else if (route.name === tabs.dashboard2.title) iconName = tabs.dashboard2.icon;
-          else if (route.name === tabs.products.title) iconName = tabs.products.icon;
+          else if (route.name === tabs.categories.title) iconName = tabs.categories.icon;
           else if (route.name === tabs.orders.title) iconName = tabs.orders.icon;
           else if (route.name === tabs.users.title) iconName = tabs.users.icon;
           else if (route.name === tabs.more.title) iconName = tabs.more.icon;
@@ -69,8 +66,8 @@ function TabNavigator() {
       })}
     >
       
-      <AdminTab.Screen name={tabs.dashboard2.title} component={AdminDashboard2} />
-      <AdminTab.Screen name={tabs.products.title} component={AdminProducts} />
+      <AdminTab.Screen name={tabs.dashboard.title} component={AdminDashboard} />
+      <AdminTab.Screen name={tabs.categories.title} component={AdminCategories} />
       <AdminTab.Screen name={tabs.orders.title} component={AdminOrders} />
       <AdminTab.Screen name={tabs.users.title} component={AdminUsers} />
       <AdminTab.Screen name={tabs.more.title} component={AdminMore} />

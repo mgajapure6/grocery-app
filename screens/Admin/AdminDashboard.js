@@ -1,575 +1,613 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
+  ScrollView,
   View,
   Text,
   TouchableOpacity,
-  ScrollView,
-  FlatList,
   TextInput,
-  Alert,
+  FlatList,
+  Platform,
+  Dimensions,
+  StyleSheet, // Needed for chart kit styles if not using className directly
+  Modal
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Feather } from '@expo/vector-icons';
-import Toast from 'react-native-toast-message';
-import { LineChart, BarChart, PieChart, ProgressChart } from 'react-native-chart-kit';
-import { Dimensions } from 'react-native';
+import { LineChart, BarChart, PieChart } from 'react-native-chart-kit'; // Added PieChart
+import DateTimePicker from '@react-native-community/datetimepicker'; // For date picker
+import { BlurView } from 'expo-blur';
+// import DatePicker from 'react-native-date-picker'
 
-// Mock static data
-const generateStaticData = () => {
-  const now = new Date();
-  const getRandomDate = (daysBack) => {
-    const date = new Date(now);
-    date.setDate(now.getDate() - Math.floor(Math.random() * daysBack));
-    return date.toISOString();
-  };
-
-  const orders = Array.from({ length: 50 }, (_, i) => ({
-    id: `ORD${1000 + i}`,
-    customerName: `Customer ${i + 1}`,
-    orderDate: getRandomDate(30),
-    totalAmount: Math.floor(Math.random() * 500) + 50,
-    status: ['New', 'Pending', 'Processing', 'Shipped', 'Cancelled'][Math.floor(Math.random() * 5)],
-  }));
-
-  const users = Array.from({ length: 20 }, (_, i) => ({
-    uid: `USER${100 + i}`,
-    name: `User ${i + 1}`,
-    email: `user${i + 1}@example.com`,
-    registrationDate: getRandomDate(30),
-    lastLogin: getRandomDate(30),
-    orders: Math.floor(Math.random() * 5),
-  }));
-
-  const products = Array.from({ length: 30 }, (_, i) => ({
-    id: `PROD${200 + i}`,
-    name: `Product ${i + 1}`,
-    stock: Math.floor(Math.random() * 20),
-    price: Math.floor(Math.random() * 100) + 10,
-    createdAt: getRandomDate(30),
-    sales: Math.floor(Math.random() * 100),
-    reviews: i % 3 === 0 ? [
+// --- Dummy Data (Replace with your API calls) ---
+// Use numbers for chart data
+const DUMMY_SALES_DATA = {
+  totalRevenue: 15450.75, // Use number
+  numOrders: 185,
+  averageOrderValue: 83.52, // Use number
+  salesTrendData: {
+    labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
+    datasets: [
       {
-        rating: Math.floor(Math.random() * 5) + 1,
-        comment: `Review for Product ${i + 1}`,
-        createdAt: getRandomDate(30),
-        reviewId: `REV${i}_${Math.random().toString(36).substr(2, 9)}`, // Unique review ID
+        data: [2000, 4500, 2800, 8000, 9900, 4300],
       }
-    ] : [],
-  }));
-
-  return { orders, users, products };
+    ],
+  },
 };
 
-const { orders, users, products } = generateStaticData();
-const reviews = products
-  .flatMap(product => product.reviews || [])
-  .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
-  .slice(0, 10);
+const DUMMY_ORDER_STATS = {
+  newOrders: 12,
+  pendingOrders: 8,
+  processingOrders: 25,
+  shippedOrders: 140,
+  cancelledOrders: 5,
+  returnOrders: 10,
+  // Data for Pie Chart
+  orderStatusDistribution: [
+    { name: 'New', count: 12, color: '#4ade80', legendFontColor: '#7F7F7F', legendFontSize: 10 }, // green-400
+    { name: 'Pending', count: 8, color: '#facc15', legendFontColor: '#7F7F7F', legendFontSize: 10 }, // yellow-400
+    { name: 'Processing', count: 25, color: '#60a5fa', legendFontColor: '#7F7F7F', legendFontSize: 10 }, // blue-400
+    { name: 'Shipped', count: 140, color: '#a78bfa', legendFontColor: '#7F7F7F', legendFontSize: 10 }, // purple-400
+    { name: 'Cancelled', count: 5, color: '#f87171', legendFontColor: '#7F7F7F', legendFontSize: 10 }, // red-400
+    { name: 'Return', count: 10, color: '#26A69A', legendFontColor: '#7F7F7F', legendFontSize: 10 }, // orange-400
+  ]
+};
 
-const screenWidth = Dimensions.get('window').width;
-const chartWidth = screenWidth - 40; // Standardized padding
-
-const AdminDashboard = ({ navigation }) => {
-  // Validate navigation prop
-  if (!navigation) {
-    console.error('Navigation prop is undefined. Ensure component is wrapped in a NavigationContainer.');
-    return (
-      <SafeAreaView className="flex-1 bg-white">
-        <Text className="text-red-600 p-4">Error: Navigation is not available.</Text>
-      </SafeAreaView>
-    );
+const DUMMY_CUSTOMER_INSIGHTS = {
+  totalCustomers: 1250,
+  newCustomersCount: 15, // Renamed for clarity
+  activeCustomersLast30Days: 480,
+  customerGrowthData: {
+    labels: ['Week 1', 'Week 2', 'Week 3', 'Week 4'],
+    datasets: [
+      {
+        data: [50, 65, 70, 85],
+      }
+    ]
   }
+};
 
-  const [salesTimeframe, setSalesTimeframe] = useState('This Month');
-  const [orderTimeframe, setOrderTimeframe] = useState('This Month');
-  const [customerTimeframe, setCustomerTimeframe] = useState('This Month');
+const DUMMY_PRODUCT_PERFORMANCE = {
+  topSellingProducts: [
+    { id: 'p1', name: 'Apples', sold: 150, revenue: 300 },
+    { id: 'p2', name: 'Bread', sold: 120, revenue: 240 },
+    { id: 'p3', name: 'Almond Milk', sold: 98, revenue: 196 },
+    { id: 'p4', name: 'Chicken', sold: 95, revenue: 570 },
+    { id: 'p5', name: 'Yogurt', sold: 88, revenue: 176 },
+  ],
+  lowStockProducts: [
+    { id: 'p10', name: 'Honey (500g)', stock: 10 },
+    { id: 'p11', name: 'Olive Oil (750ml)', stock: 5 },
+  ],
+  recentlyAddedProducts: [
+    { id: 'p20', name: 'Spicy Kimchi', date: '2023-10-20' },
+    { id: 'p21', name: 'Vegan Cheese Slices', date: '2023-10-18' },
+  ],
+};
+
+const DUMMY_WEBSITE_PERFORMANCE = {
+  visits: 5870,
+  conversionRate: '3.5%',
+  bounceRate: '25%',
+  // Add trend data if needed for charts
+  // visitsTrendData: { labels: ['Mon', 'Tue', 'Wed'], datasets: [{ data: [100, 150, 120] }] },
+};
+
+const DUMMY_RECENT_ACTIVITIES = {
+  recentOrders: [
+    { id: 'ORD1001', customer: 'Alice Smith', date: '2023-10-25', total: '$55.20', status: 'Shipped' },
+    { id: 'ORD1002', customer: 'Bob Johnson', date: '2023-10-25', total: '$32.10', status: 'Processing' },
+    { id: 'ORD1003', customer: 'Charlie Brown', date: '2023-10-24', total: '$120.50', status: 'Pending' },
+  ],
+  newCustomers: [
+    { id: 'CUST501', name: 'Diana Prince', date: '2023-10-25' },
+    { id: 'CUST502', name: 'Steve Trevor', date: '2023-10-24' },
+  ],
+  lowStockAlerts: [
+    { id: 'ALERT001', product: 'Honey (500g)', stock: 10 },
+    { id: 'ALERT002', product: 'Olive Oil (750ml)', stock: 5 },
+  ],
+  // Add dummy data for reviews, payments if needed
+};
+
+
+// --- Helper function to render metric cards ---
+const MetricCard = ({ title, value, iconName, iconColor = 'text-gray-500' }) => (
+  <View className="bg-white rounded-lg p-4 shadow-sm flex-1 m-1 items-center">
+    {iconName && <Feather name={iconName} size={24} className={`${iconColor} mb-2`} />}
+    {/* Format numbers for display */}
+    <Text className="text-xl font-bold text-gray-800">{typeof value === 'number' ? (title.includes('Revenue') || title.includes('Value') ? `$${value.toFixed(2)}` : value) : value}</Text>
+    <Text className="text-sm text-gray-500 mt-1">{title}</Text>
+  </View>
+);
+
+// --- Helper function to render list items ---
+const ListItem = ({ label, value }) => (
+  <View className="flex-row justify-between py-2 border-b border-gray-200">
+    <Text className="text-gray-700">{label}</Text>
+    <Text className="font-semibold text-gray-800">{value}</Text>
+  </View>
+);
+
+
+export default function AdminDashboard({ navigation }) {
+  const [salesData, setSalesData] = useState(DUMMY_SALES_DATA);
+  const [orderStats, setOrderStats] = useState(DUMMY_ORDER_STATS);
+  const [customerInsights, setCustomerInsights] = useState(DUMMY_CUSTOMER_INSIGHTS);
+  const [productPerformance, setProductPerformance] = useState(DUMMY_PRODUCT_PERFORMANCE);
+  const [websitePerformance, setWebsitePerformance] = useState(DUMMY_WEBSITE_PERFORMANCE);
+  const [recentActivities, setRecentActivities] = useState(DUMMY_RECENT_ACTIVITIES);
   const [searchQuery, setSearchQuery] = useState('');
 
-  const calculateKPIs = (timeframe, type) => {
-    const now = new Date();
-    let startDate;
-    switch (timeframe) {
-      case 'Today':
-        startDate = new Date(now.setHours(0, 0, 0, 0));
-        break;
-      case 'This Week':
-        startDate = new Date(now.setDate(now.getDate() - 7));
-        break;
-      case 'Last 3 Days':
-        startDate = new Date(now.setDate(now.getDate() - 3));
-        break;
-      case 'Last 15 Days':
-        startDate = new Date(now.setDate(now.getDate() - 15));
-        break;
-      case 'This Month':
-      default:
-        startDate = new Date(now.setDate(now.getDate() - 30));
-        break;
+  // --- Date Picker State and Handlers ---
+  const [selectedStartDate, setSelectedStartDate] = useState(new Date(Date.now() - 7 * 24 * 60 * 60 * 1000)); // Default: last 7 days
+  const [selectedEndDate, setSelectedEndDate] = useState(new Date());
+  const [showDatePicker, setShowDatePicker] = useState(false);
+  const [isSettingStartDate, setIsSettingStartDate] = useState(true); // True if setting start date, false for end date
+
+  const screenWidth = Dimensions.get('window').width;
+  const chartWidth = screenWidth - 60; // Account for p-4 (16 units padding on each side)
+
+  // In a real app, you would fetch data based on selectedStartDate and selectedEndDate
+  useEffect(() => {
+    console.log("Fetching data for range:", selectedStartDate.toDateString(), "to", selectedEndDate.toDateString());
+    // Example: fetchData(selectedStartDate, selectedEndDate).then(data => updateState(data));
+    // For now, using dummy data loaded initially, ignoring the date range in data itself.
+    // You would typically make API calls here and update the state variables (setSalesData, setOrderStats, etc.)
+  }, [selectedStartDate, selectedEndDate]); // Re-run effect when dates change
+
+  const handleDateChange = (event, date) => {
+    setShowDatePicker(false); // Hide picker on Android after selection
+    if (date) {
+      if (isSettingStartDate) {
+        setSelectedStartDate(date);
+        // Automatically prompt for end date after selecting start on Android
+        if (Platform.OS === 'android') {
+          setIsSettingStartDate(false);
+          // Need a slight delay or logic to show end date picker
+          // For simplicity, we'll let the user tap the button again for the end date
+          // A more complex implementation might involve a modal or sequence
+          console.log("Start Date set:", date);
+        }
+      } else {
+        // Ensure end date is not before start date
+        if (date >= selectedStartDate) {
+          setSelectedEndDate(date);
+          console.log("End Date set:", date);
+        } else {
+          // Handle error or just set it to start date
+          setSelectedEndDate(selectedStartDate);
+          console.log("End date cannot be before start date. Setting End Date to Start Date.");
+        }
+        setIsSettingStartDate(true); // Reset for next selection cycle
+      }
     }
-
-    if (type === 'sales') {
-      const filteredOrders = orders.filter(
-        order => new Date(order.orderDate) >= startDate
-      );
-      const totalRevenue = filteredOrders.reduce((sum, order) => sum + order.totalAmount, 0);
-      const numberOfOrders = filteredOrders.length;
-      const averageOrderValue = numberOfOrders ? (totalRevenue / numberOfOrders).toFixed(2) : 0;
-      return { totalRevenue: totalRevenue.toFixed(2), numberOfOrders, averageOrderValue };
-    }
-
-    if (type === 'orders') {
-      const filteredOrders = orders.filter(
-        order => new Date(order.orderDate) >= startDate
-      );
-      return {
-        new: filteredOrders.filter(order => order.status === 'New').length,
-        pending: filteredOrders.filter(order => order.status === 'Pending').length,
-        processing: filteredOrders.filter(order => order.status === 'Processing').length,
-        shipped: filteredOrders.filter(order => order.status === 'Shipped').length,
-        cancelled: filteredOrders.filter(order => order.status === 'Cancelled').length,
-      };
-    }
-
-    if (type === 'customers') {
-      const filteredUsers = users.filter(
-        user => new Date(user.registrationDate) >= startDate
-      );
-      const totalCustomers = users.length;
-      const newCustomers = filteredUsers.length;
-      const activeCustomers = users.filter(
-        user => new Date(user.lastLogin) >= startDate
-      ).length;
-      return { totalCustomers, newCustomers, activeCustomers };
-    }
-
-    return {};
   };
 
-  const salesKPIs = calculateKPIs(salesTimeframe, 'sales');
-  const orderKPIs = calculateKPIs(orderTimeframe, 'orders');
-  const customerKPIs = calculateKPIs(customerTimeframe, 'customers');
-
-  // Chart data
-  const salesChartData = {
-    labels: ['Day 1', 'Day 2', 'Day 3', 'Day 4', 'Day 5', 'Day 6', 'Day 7'],
-    datasets: [{
-      data: orders
-        .filter(order => new Date(order.orderDate) >= new Date(new Date().setDate(new Date().getDate() - 7)))
-        .reduce((acc, order) => {
-          const day = Math.floor((new Date() - new Date(order.orderDate)) / (1000 * 60 * 60 * 24));
-          if (day >= 0 && day < 7) {
-            acc[6 - day] = (acc[6 - day] || 0) + order.totalAmount;
-          }
-          return acc;
-        }, Array(7).fill(0)),
-    }],
+  const showStartDatePicker = () => {
+    setIsSettingStartDate(true);
+    setShowDatePicker(true);
   };
 
-  const orderChartData = {
-    labels: ['New', 'Pending', 'Processing', 'Shipped', 'Cancelled'],
-    datasets: [{
-      data: [
-        orderKPIs.new,
-        orderKPIs.pending,
-        orderKPIs.processing,
-        orderKPIs.shipped,
-        orderKPIs.cancelled,
-      ],
-    }],
+  const showEndDatePicker = () => {
+    setIsSettingStartDate(false);
+    setShowDatePicker(true);
   };
 
-  const customerChartData = [
-    {
-      name: 'Active',
-      population: customerKPIs.activeCustomers,
-      color: '#007bff',
-      legendFontColor: '#333',
-      legendFontSize: 12,
-    },
-    {
-      name: 'Inactive',
-      population: Math.max(0, customerKPIs.totalCustomers - customerKPIs.activeCustomers),
-      color: '#6c757d',
-      legendFontColor: '#333',
-      legendFontSize: 12,
-    },
-  ];
 
-  const conversionChartData = {
-    labels: ['Conversion Rate'],
-    data: [0.025], // 2.5% conversion rate
-    colors: ['#007bff'],
-  };
+  // --- Render Sections ---
 
-  // Product Performance
-  const topSellingProducts = products
-    .sort((a, b) => (b.sales || 0) - (a.sales || 0))
-    .slice(0, 5);
-  const lowStockProducts = products
-    .filter(product => product.stock <= 5)
-    .slice(0, 5);
-  const recentProducts = products
-    .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
-    .slice(0, 5);
-
-  // Recent Activities
-  const recentOrders = orders
-    .sort((a, b) => new Date(b.orderDate) - new Date(a.orderDate))
-    .slice(0, 5);
-  const newCustomers = users
-    .sort((a, b) => new Date(b.registrationDate) - new Date(a.registrationDate))
-    .slice(0, 5);
-  const lowStockAlerts = lowStockProducts;
-
-  // Mock Website/App Performance
-  const websitePerformance = {
-    visits: 10000,
-    conversionRate: '2.5%',
-    bounceRate: '40%',
-  };
-
-  const showTimeframeDialog = (type, setTimeframe) => {
-    Alert.alert(
-      'Select Timeframe',
-      '',
-      [
-        { text: 'Today', onPress: () => setTimeframe('Today') },
-        { text: 'This Week', onPress: () => setTimeframe('This Week') },
-        { text: 'This Month', onPress: () => setTimeframe('This Month') },
-        { text: 'Last 3 Days', onPress: () => setTimeframe('Last 3 Days') },
-        { text: 'Last 15 Days', onPress: () => setTimeframe('Last 15 Days') },
-        { text: 'Cancel', style: 'cancel' },
-      ],
-      { cancelable: true }
-    );
-  };
-
-  const handleSearch = () => {
-    if (!searchQuery) return;
-    const orderResults = orders.filter(
-      order => order.id.includes(searchQuery) || order.customerName.toLowerCase().includes(searchQuery.toLowerCase())
-    );
-    const userResults = users.filter(
-      user => user.name.toLowerCase().includes(searchQuery.toLowerCase()) || user.email.toLowerCase().includes(searchQuery.toLowerCase())
-    );
-    const productResults = products.filter(
-      product => product.name.toLowerCase().includes(searchQuery.toLowerCase())
-    );
-    console.log('Search Results:', { orders: orderResults, users: userResults, products: productResults });
-    Toast.show({
-      type: 'success',
-      text1: `Found ${orderResults.length} orders, ${userResults.length} users, ${productResults.length} products`,
-      position: 'bottom',
-    });
-    setSearchQuery('');
-  };
-
-  const renderKPI = ({ title, value, unit = '' }) => (
-    <View className="bg-gray-50 rounded-lg p-4 flex-1 mx-1 shadow-sm">
-      <Text className="text-sm font-semibold text-gray-600">{title}</Text>
-      <Text className="text-xl font-bold text-gray-800 mt-2">{value} {unit}</Text>
+  const renderSalesOverview = () => (
+    <View className="bg-white rounded-lg p-4 mb-6">
+      <View className="flex-row items-center justify-between mb-4 border-b border-gray-50 pb-3">
+        <View className="flex-row items-center">
+          <Feather name="dollar-sign" size={20} className="text-green-600 mr-2" />
+          <Text className="text-lg font-bold text-gray-800">Sales Overview</Text>
+        </View>
+        {/* Date Range Selector */}
+        <View className="flex-row items-center">
+          <TouchableOpacity onPress={showStartDatePicker} className="px-2 py-1 border border-gray-300 rounded-md mr-2">
+            <Text className="text-sm text-gray-700">{selectedStartDate.toLocaleDateString()}</Text>
+          </TouchableOpacity>
+          <Text className="text-sm text-gray-600">To</Text>
+          <TouchableOpacity onPress={showEndDatePicker} className="px-2 py-1 border border-gray-300 rounded-md ml-2">
+            <Text className="text-sm text-gray-700">{selectedEndDate.toLocaleDateString()}</Text>
+          </TouchableOpacity>
+        </View>
+      </View>
+      <View className="flex-row justify-between flex-wrap">
+        <MetricCard title="Total Revenue" value={salesData.totalRevenue} iconName="dollar-sign" iconColor="text-green-600" />
+        <MetricCard title="Total Orders" value={salesData.numOrders} iconName="shopping-bag" iconColor="text-blue-600" />
+        <MetricCard title="Avg. Order Value" value={salesData.averageOrderValue} iconName="tag" iconColor="text-purple-600" />
+      </View>
+      {/* Sales Trend Chart */}
+      {salesData.salesTrendData && (
+        <View className="mt-6">
+          <Text className="text-base font-semibold text-gray-800 mb-2">Sales Trends ({selectedStartDate.toLocaleDateString()} - {selectedEndDate.toLocaleDateString()})</Text>
+          <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+            <LineChart
+              data={salesData.salesTrendData}
+              width={Math.max(chartWidth, salesData.salesTrendData.labels.length * 50)} // Ensure minimum width for many labels
+              height={220}
+              chartConfig={{
+                backgroundColor: '#ffffff',
+                backgroundGradientFrom: '#ffffff',
+                backgroundGradientTo: '#ffffff',
+                decimalPlaces: 0, // optional, defaults to 2dp
+                color: (opacity = 1) => `rgba(134, 65, 244, ${opacity})`,
+                labelColor: (opacity = 1) => `rgba(0, 0, 0, ${opacity})`,
+                style: {
+                  borderRadius: 16,
+                },
+                propsForDots: {
+                  r: '6',
+                  strokeWidth: '2',
+                  stroke: '#ffa726',
+                },
+                formatYLabel: (y) => `$${y}`, // Format Y-axis labels as currency
+              }}
+              bezier // Makes the line curved
+              style={{
+                marginVertical: 8,
+                borderRadius: 16,
+              }}
+            />
+          </ScrollView>
+        </View>
+      )}
     </View>
   );
 
-  const renderListItem = ({ item, type, onPress }) => (
-    <TouchableOpacity
-      className="py-3 border-b border-gray-200"
-      onPress={onPress}
-      accessibilityLabel={`View ${type} details`}
-    >
-      <View className="flex-row justify-between items-center">
-        <View>
-          <Text className="text-base text-gray-800">
-            {type === 'order' && `${item.id} - ${item.customerName} - $${item.totalAmount} (${item.status})`}
-            {type === 'user' && `${item.name} (${item.email})`}
-            {type === 'product' && `${item.name} (Stock: ${item.stock})`}
-            {type === 'review' && `${item.rating}/5 - ${item.comment}`}
-          </Text>
-          <Text className="text-sm text-gray-600">
-            {type !== 'review' ? new Date(item.orderDate || item.registrationDate || item.createdAt).toLocaleString() : ''}
-          </Text>
+  const renderOrderStatistics = () => (
+    <View className="bg-white rounded-lg p-4 mb-6">
+      <View className="flex-row items-center justify-between mb-4 border-b border-gray-50 pb-3">
+        <View className="flex-row items-center">
+          <Feather name="package" size={20} className="text-blue-600 mr-2" />
+          <Text className="text-lg font-bold text-gray-800">Order Statistics</Text>
         </View>
-        {type === 'product' && item.stock <= 5 && (
-          <View className="bg-red-600 text-white rounded-full px-2 py-1">
-            <Text className="text-xs">Low Stock</Text>
+        {/* Using the global date range display */}
+        <Text className="text-sm text-gray-600">{selectedStartDate.toLocaleDateString()} - {selectedEndDate.toLocaleDateString()}</Text>
+      </View>
+      <View className="flex-row flex-wrap m-1">
+        <View className="w-1/3 p-1"><MetricCard title="New" value={orderStats.newOrders} iconName="plus-circle" iconColor="text-green-500" /></View>
+        <View className="w-1/3 p-1"><MetricCard title="Pending" value={orderStats.pendingOrders} iconName="clock" iconColor="text-yellow-500" /></View>
+        <View className="w-1/3 p-1"><MetricCard title="Processing" value={orderStats.processingOrders} iconName="settings" iconColor="text-blue-500" /></View>
+        <View className="w-1/3 p-1"><MetricCard title="Shipped" value={orderStats.shippedOrders} iconName="truck" iconColor="text-purple-500" /></View>
+        <View className="w-1/3 p-1"><MetricCard title="Cancelled" value={orderStats.cancelledOrders} iconName="x-circle" iconColor="text-red-500" /></View>
+        <View className="w-1/3 p-1"><MetricCard title="Return" value={orderStats.cancelledOrders} iconName="shuffle" iconColor="text-red-500" /></View>
+        {/* Add a filler if needed to make rows even, adjust based on number of metrics */}
+        {/* <View className="w-1/2 p-1 opacity-0"></View> */}
+      </View>
+
+      {/* Order Status Distribution Pie Chart */}
+      {orderStats.orderStatusDistribution && orderStats.orderStatusDistribution.reduce((sum, item) => sum + item.count, 0) > 0 && (
+        <View className="mt-6 items-center">
+          <Text className="text-base font-semibold text-gray-800 mb-2">Order Status Distribution</Text>
+          <PieChart
+            data={orderStats.orderStatusDistribution}
+            width={chartWidth}
+            height={220}
+            chartConfig={{
+              backgroundColor: '#ffffff',
+              backgroundGradientFrom: '#ffffff',
+              backgroundGradientTo: '#ffffff',
+              color: (opacity = 1) => `rgba(0, 0, 0, ${opacity})`, // Used for legend text
+            }}
+            accessor="count" // Key in data objects for pie slice size
+            backgroundColor="transparent"
+            paddingLeft="15" // Adjust as needed
+            absolute // Show absolute values in tooltips (if hover worked)
+          />
+        </View>
+      )}
+    </View>
+  );
+
+  const renderCustomerInsights = () => (
+    <View className="bg-white rounded-lg p-4 mb-6 ">
+      <View className="flex-row items-center justify-between mb-4 border-b border-gray-50 pb-3">
+        <View className="flex-row items-center">
+          <Feather name="users" size={20} className="text-indigo-600 mr-2" />
+          <Text className="text-lg font-bold text-gray-800">Customer Insights</Text>
+        </View>
+        {/* Using the global date range display */}
+        <Text className="text-sm text-gray-600">{selectedStartDate.toLocaleDateString()} - {selectedEndDate.toLocaleDateString()}</Text>
+      </View>
+      <View className="flex-row justify-between flex-wrap">
+        <MetricCard title="Total Customers" value={customerInsights.totalCustomers} iconName="user" iconColor="text-indigo-600" />
+        <MetricCard title="New Customers" value={customerInsights.newCustomersCount} iconName="user-plus" iconColor="text-teal-600" />
+        <MetricCard title="Active (30D)" value={customerInsights.activeCustomersLast30Days} iconName="activity" iconColor="text-orange-600" />
+      </View>
+      {/* Customer Growth Chart */}
+      {customerInsights.customerGrowthData && (
+        <View className="mt-6">
+          <Text className="text-base font-semibold text-gray-800 mb-2">Customer Growth ({selectedStartDate.toLocaleDateString()} - {selectedEndDate.toLocaleDateString()})</Text>
+          <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+            <BarChart
+              data={customerInsights.customerGrowthData}
+              width={Math.max(chartWidth, customerInsights.customerGrowthData.labels.length * 50)} // Ensure minimum width
+              height={220}
+              chartConfig={{
+                backgroundColor: '#ffffff',
+                backgroundGradientFrom: '#ffffff',
+                backgroundGradientTo: '#ffffff',
+                decimalPlaces: 0,
+                color: (opacity = 1) => `rgba(255, 99, 132, ${opacity})`,
+                labelColor: (opacity = 1) => `rgba(0, 0, 0, ${opacity})`,
+                style: {
+                  borderRadius: 16,
+                },
+              }}
+              style={{
+                marginVertical: 8,
+                borderRadius: 16,
+              }}
+            />
+          </ScrollView>
+        </View>
+      )}
+    </View>
+  );
+
+  const renderProductPerformance = () => {
+    // Data for Top Selling Products Bar Chart (Example: based on revenue)
+    const topSellingChartData = {
+      labels: productPerformance.topSellingProducts.map(p => p.name.split(' ')[0]), // Use first word for shorter labels
+      datasets: [
+        {
+          data: productPerformance.topSellingProducts.map(p => p.revenue),
+        }
+      ]
+    };
+
+    return (
+      <View className="bg-white rounded-lg p-4 mb-6 ">
+        <View className="flex-row items-center mb-4 border-b border-gray-50 pb-3">
+          <Feather name="shopping-cart" size={20} className="text-teal-600 mr-2" />
+          <Text className="text-lg font-bold text-gray-800">Product Performance</Text>
+        </View>
+
+        {/* Top Selling Products Bar Chart */}
+        {topSellingChartData.datasets[0].data.length > 0 && (
+          <View className="mb-6">
+            <Text className="text-base font-semibold text-gray-800 mb-2">Top Selling Products (by Revenue)</Text>
+            <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+              <BarChart
+                data={topSellingChartData}
+                width={Math.max(chartWidth, topSellingChartData.labels.length * 50)} // Adjust width based on number of bars
+                height={220}
+                yAxisLabel="$"
+                chartConfig={{
+                  backgroundColor: '#ffffff',
+                  backgroundGradientFrom: '#ffffff',
+                  backgroundGradientTo: '#ffffff',
+                  decimalPlaces: 0, // Show whole numbers for revenue
+                  color: (opacity = 1) => `rgba(0, 128, 128, ${opacity})`, // Teal color
+                  labelColor: (opacity = 1) => `rgba(0, 0, 0, ${opacity})`,
+                  style: {
+                    borderRadius: 16,
+                  },
+                }}
+                style={{
+                  marginVertical: 8,
+                  borderRadius: 16,
+                }}
+              />
+            </ScrollView>
           </View>
         )}
+
+        {/* Recently Added Products List */}
+        <View>
+          <Text className="text-base font-semibold text-gray-800 mb-2">Recently Added Products</Text>
+          {productPerformance.recentlyAddedProducts.map((product) => (
+            <ListItem key={product.id} label={product.name} value={`Added: ${product.date}`} />
+          ))}
+        </View>
       </View>
-    </TouchableOpacity>
+    );
+  };
+
+
+  const renderWebsitePerformance = () => (
+    <View className="bg-white rounded-lg p-4 mb-6">
+      <View className="flex-row items-center justify-between mb-4 border-b border-gray-50 pb-3">
+        <View className="flex-row items-center">
+          <Feather name="activity" size={20} className="text-pink-600 mr-2" />
+          <Text className="text-lg font-bold text-gray-800">Website/App Performance</Text>
+        </View>
+        {/* Using the global date range display */}
+        <Text className="text-sm text-gray-600">{selectedStartDate.toLocaleDateString()} - {selectedEndDate.toLocaleDateString()}</Text>
+      </View>
+      <View className="flex-row justify-between flex-wrap">
+        <MetricCard title="Visits" value={websitePerformance.visits} iconName="eye" iconColor="text-pink-600" />
+        <MetricCard title="Conversion Rate" value={websitePerformance.conversionRate} iconName="percent" iconColor="text-violet-600" />
+        <MetricCard title="Bounce Rate" value={websitePerformance.bounceRate} iconName="corner-up-right" iconColor="text-red-600" />
+      </View>
+      {/* Add Charts for Trends Here if you have data */}
+      {/* Example: Visits Trend Line Chart */}
+      {/* {websitePerformance.visitsTrendData && (
+         <View className="mt-6">
+           <Text className="text-base font-semibold text-gray-800 mb-2">Visits Trend</Text>
+           <LineChart data={websitePerformance.visitsTrendData} ... />
+         </View>
+       )} */}
+    </View>
   );
+
+  const renderRecentActivities = () => (
+    <View className="bg-white rounded-lg p-4 mb-6">
+      <View className="flex-row items-center mb-4 border-b border-gray-50 pb-3">
+        <Feather name="bell" size={20} className="text-red-600 mr-2" />
+        <Text className="text-lg font-bold text-gray-800">Recent Activities & Notifications</Text>
+      </View>
+
+      {/* Recent Orders */}
+      <View className="mb-4">
+        <Text className="text-base font-semibold text-gray-800 mb-2">Recent Orders (Last 10 or 20)</Text>
+        {recentActivities.recentOrders.map((order) => (
+          <View key={order.id} className="py-2 border-b border-gray-200">
+            <Text className="text-gray-700 font-semibold">{order.id}</Text>
+            <Text className="text-sm text-gray-600">Customer: {order.customer}</Text>
+            <Text className="text-sm text-gray-600">Date: {order.date}</Text>
+            <View className="flex-row justify-between items-center">
+              <Text className="text-base font-bold text-green-600">{order.total}</Text>
+              <Text className={`text-sm font-semibold ${order.status === 'Pending' ? 'text-yellow-600' : order.status === 'Shipped' ? 'text-blue-600' : order.status === 'Processing' ? 'text-purple-600' : 'text-gray-600'}`}>{order.status}</Text>
+            </View>
+          </View>
+        ))}
+        {recentActivities.recentOrders.length === 0 && <Text className="text-gray-500 italic">No recent orders.</Text>}
+
+      </View>
+
+      {/* New Customer Registrations */}
+      <View className="mb-4">
+        <Text className="text-base font-semibold text-gray-800 mb-2">New Customer Registrations</Text>
+        {recentActivities.newCustomers.map((customer) => (
+          <ListItem key={customer.id} label={customer.name} value={`Joined: ${customer.date}`} />
+        ))}
+        {recentActivities.newCustomers.length === 0 && <Text className="text-gray-500 italic">No new registrations.</Text>}
+      </View>
+
+      {/* Low Stock Alerts (Linked to Product Performance data, could be separate) */}
+      <View>
+        <Text className="text-base font-semibold text-gray-800 mb-2 text-orange-600">Low Stock Alerts</Text>
+        {recentActivities.lowStockAlerts.map((alert) => (
+          <ListItem key={alert.id} label={`Product: ${alert.product}`} value={`Stock: ${alert.stock}`} />
+        ))}
+        {recentActivities.lowStockAlerts.length === 0 && <Text className="text-gray-500 italic">No low stock alerts.</Text>}
+      </View>
+
+      {/* Add Recent Reviews, Payment Notifications here if applicable */}
+    </View>
+  );
+
+  const renderQuickActions = () => (
+    <View className="bg-white rounded-lg p-4 mb-6">
+      <View className="flex-row items-center border-b border-gray-50 pb-3">
+        <Feather name="bookmark" size={20} className="text-green-600 mr-2" />
+        <Text className="text-lg font-bold text-gray-800">Quick Actons</Text>
+      </View>
+      {/* <Text className="text-lg font-bold text-gray-800 mb-4 mt-3">Quick Actions</Text> */}
+      <View className="flex-row flex-wrap justify-between mt-4">
+        <TouchableOpacity
+          className="w-1/2 p-2 items-center"
+          onPress={() => { /* navigation.navigate('AddProduct') */ }}
+        >
+          <View className="bg-blue-100 rounded-full p-3 mb-2">
+            <Feather name="plus" size={24} className="text-blue-600" />
+          </View>
+          <Text className="text-sm font-semibold text-center text-gray-700">Add New Product</Text>
+        </TouchableOpacity>
+        <TouchableOpacity
+          className="w-1/2 p-2 items-center"
+          onPress={() => { /* navigation.navigate('AllOrders') */ }}
+        >
+          <View className="bg-green-100 rounded-full p-3 mb-2">
+            <Feather name="list" size={24} className="text-green-600" />
+          </View>
+          <Text className="text-sm font-semibold text-center text-gray-700">View All Orders</Text>
+        </TouchableOpacity>
+        <TouchableOpacity
+          className="w-1/2 p-2 items-center mt-2"
+          onPress={() => { /* navigation.navigate('ManageUsers') */ }}
+        >
+          <View className="bg-purple-100 rounded-full p-3 mb-2">
+            <Feather name="users" size={24} className="text-purple-600" />
+          </View>
+          <Text className="text-sm font-semibold text-center text-gray-700">Manage Users</Text>
+        </TouchableOpacity>
+        <TouchableOpacity
+          className="w-1/2 p-2 items-center mt-2"
+          onPress={() => { /* navigation.navigate('ProcessOrders') */ }}
+        >
+          <View className="bg-yellow-100 rounded-full p-3 mb-2">
+            <Feather name="play" size={24} className="text-yellow-600" />
+          </View>
+          <Text className="text-sm font-semibold text-center text-gray-700">Process Orders</Text>
+        </TouchableOpacity>
+      </View>
+    </View>
+  );
+
 
   return (
-    <SafeAreaView className="flex-1 bg-white" edges={['left', 'right']}>
-      <View className="flex-1 bg-gray-100">
-        <ScrollView contentContainerStyle={{ padding: 10, paddingBottom: 50 }}>
-          {/* Sales Overview */}
-          <View className="bg-white rounded-xl p-4 mb-4">
-            <View className="flex-row justify-between items-center mb-4">
-              <Text className="text-lg font-bold text-gray-800">Sales Overview</Text>
-              <TouchableOpacity
-                className="flex-row items-center border border-gray-300 rounded-lg p-2"
-                onPress={() => showTimeframeDialog('sales', setSalesTimeframe)}
-                accessibilityLabel="Select sales timeframe"
-              >
-                <Text className="text-base text-gray-800">{salesTimeframe}</Text>
-                <Feather name="chevron-down" size={20} color="#333" />
-              </TouchableOpacity>
-            </View>
-            <View className="flex-row justify-between">
-              {renderKPI({ title: 'Total Revenue', value: salesKPIs.totalRevenue, unit: '$' })}
-              {renderKPI({ title: 'Number of Orders', value: salesKPIs.numberOfOrders })}
-              {renderKPI({ title: 'Average Order Value', value: salesKPIs.averageOrderValue, unit: '$' })}
-            </View>
-            <Text className="text-sm font-semibold text-gray-800 mt-4 mb-2">Sales Trends</Text>
-            <LineChart
-              data={salesChartData}
-              width={chartWidth}
-              height={220}
-              chartConfig={{
-                backgroundColor: '#fff',
-                backgroundGradientFrom: '#fff',
-                backgroundGradientTo: '#fff',
-                decimalPlaces: 0,
-                color: (opacity = 1) => `rgba(0, 123, 255, ${opacity})`,
-                labelColor: (opacity = 1) => `rgba(51, 51, 51, ${opacity})`,
-                propsForDots: { r: '6', strokeWidth: '2', stroke: '#007bff' },
-              }}
-              bezier
-              style={{ marginVertical: 8, borderRadius: 16 }}
-            />
-          </View>
-
-          {/* Order Statistics */}
-          <View className="bg-white rounded-xl p-4 mb-4">
-            <View className="flex-row justify-between items-center mb-4">
-              <Text className="text-lg font-bold text-gray-800">Order Statistics</Text>
-              <TouchableOpacity
-                className="flex-row items-center border border-gray-300 rounded-lg p-2"
-                onPress={() => showTimeframeDialog('orders', setOrderTimeframe)}
-                accessibilityLabel="Select order timeframe"
-              >
-                <Text className="text-base text-gray-800">{orderTimeframe}</Text>
-                <Feather name="chevron-down" size={20} color="#333" />
-              </TouchableOpacity>
-            </View>
-            <View className="flex-row flex-wrap justify-between">
-              {renderKPI({ title: 'New Orders', value: orderKPIs.new })}
-              {renderKPI({ title: 'Pending Orders', value: orderKPIs.pending })}
-              {renderKPI({ title: 'Processing Orders', value: orderKPIs.processing })}
-              {renderKPI({ title: 'Shipped Orders', value: orderKPIs.shipped })}
-              {renderKPI({ title: 'Cancelled/Returned', value: orderKPIs.cancelled })}
-            </View>
-            <Text className="text-sm font-semibold text-gray-800 mt-4 mb-2">Order Status Breakdown</Text>
-            <BarChart
-              data={orderChartData}
-              width={chartWidth}
-              height={220}
-              chartConfig={{
-                backgroundColor: '#fff',
-                backgroundGradientFrom: '#fff',
-                backgroundGradientTo: '#fff',
-                decimalPlaces: 0,
-                color: (opacity = 1) => `rgba(0, 123, 255, ${opacity})`,
-                labelColor: (opacity = 1) => `rgba(51, 51, 51, ${opacity})`,
-              }}
-              style={{ marginVertical: 8, borderRadius: 16 }}
-            />
-          </View>
-
-          {/* Customer Insights */}
-          <View className="bg-white rounded-xl p-4 mb-4">
-            <View className="flex-row justify-between items-center mb-4">
-              <Text className="text-lg font-bold text-gray-800">Customer Insights</Text>
-              <TouchableOpacity
-                className="flex-row items-center border border-gray-300 rounded-lg p-2"
-                onPress={() => showTimeframeDialog('customers', setCustomerTimeframe)}
-                accessibilityLabel="Select customer timeframe"
-              >
-                <Text className="text-base text-gray-800">{customerTimeframe}</Text>
-                <Feather name="chevron-down" size={20} color="#333" />
-              </TouchableOpacity>
-            </View>
-            <View className="flex-row justify-between">
-              {renderKPI({ title: 'Total Customers', value: customerKPIs.totalCustomers })}
-              {renderKPI({ title: 'New Customers', value: customerKPIs.newCustomers })}
-              {renderKPI({ title: 'Active Customers', value: customerKPIs.activeCustomers })}
-            </View>
-            <Text className="text-sm font-semibold text-gray-800 mt-4 mb-2">Customer Activity</Text>
-            <PieChart
-              data={customerChartData}
-              width={chartWidth}
-              height={220}
-              chartConfig={{
-                color: (opacity = 1) => `rgba(0, 123, 255, ${opacity})`,
-                labelColor: (opacity = 1) => `rgba(51, 51, 51, ${opacity})`,
-              }}
-              accessor="population"
-              backgroundColor="transparent"
-              paddingLeft="15"
-              style={{ marginVertical: 8 }}
-            />
-          </View>
-
-          {/* Product Performance */}
-          <View className="bg-white rounded-xl p-4 mb-4">
-            <Text className="text-lg font-bold text-gray-800 mb-4">Product Performance</Text>
-            <Text className="text-sm font-semibold text-gray-800 mb-2">Top Selling Products</Text>
-            <FlatList
-              data={topSellingProducts}
-              renderItem={({ item }) => renderListItem({
-                item,
-                type: 'product',
-                onPress: () => navigation.navigate('AdminItemDetail', { item })
-              })}
-              keyExtractor={item => item.id}
-              ListEmptyComponent={<Text className="text-gray-600 text-center">No products</Text>}
-            />
-            <Text className="text-sm font-semibold text-gray-800 mt-4 mb-2">Low Stock/Out of Stock</Text>
-            <FlatList
-              data={lowStockProducts}
-              renderItem={({ item }) => renderListItem({
-                item,
-                type: 'product',
-                onPress: () => navigation.navigate('AdminItemDetail', { item })
-              })}
-              keyExtractor={item => item.id}
-              ListEmptyComponent={<Text className="text-gray-600 text-center">No products</Text>}
-            />
-            <Text className="text-sm font-semibold text-gray-800 mt-4 mb-2">Recently Added Products</Text>
-            <FlatList
-              data={recentProducts}
-              renderItem={({ item }) => renderListItem({
-                item,
-                type: 'product',
-                onPress: () => navigation.navigate('AdminItemDetail', { item })
-              })}
-              keyExtractor={item => item.id}
-              ListEmptyComponent={<Text className="text-gray-600 text-center">No products</Text>}
-            />
-          </View>
-
-          {/* Website/App Performance */}
-          <View className="bg-white rounded-xl p-4 mb-4">
-            <Text className="text-lg font-bold text-gray-800 mb-4">Website/App Performance</Text>
-            <View className="flex-row justify-between">
-              {renderKPI({ title: 'Visits', value: websitePerformance.visits })}
-              {renderKPI({ title: 'Conversion Rate', value: websitePerformance.conversionRate })}
-              {renderKPI({ title: 'Bounce Rate', value: websitePerformance.bounceRate })}
-            </View>
-            <Text className="text-sm font-semibold text-gray-800 mt-4 mb-2">Conversion Rate</Text>
-            <ProgressChart
-              data={conversionChartData}
-              width={chartWidth}
-              height={220}
-              strokeWidth={16}
-              radius={60}
-              chartConfig={{
-                backgroundColor: '#fff',
-                backgroundGradientFrom: '#fff',
-                backgroundGradientTo: '#fff',
-                color: (opacity = 1) => `rgba(0, 123, 255, ${opacity})`,
-              }}
-              hideLegend={false}
-              style={{ marginVertical: 8 }}
-            />
-          </View>
-
-          {/* Recent Activities and Notifications */}
-          <View className="bg-white rounded-xl p-4 mb-4">
-            <Text className="text-lg font-bold text-gray-800 mb-4">Recent Activities</Text>
-            <Text className="text-sm font-semibold text-gray-800 mb-2">Recent Orders</Text>
-            <FlatList
-              data={recentOrders}
-              renderItem={({ item }) => renderListItem({
-                item,
-                type: 'order',
-                onPress: () => navigation.navigate('AdminOrders', { order: item })
-              })}
-              keyExtractor={item => item.id}
-              ListEmptyComponent={<Text className="text-gray-600 text-center">No orders</Text>}
-            />
-            <Text className="text-sm font-semibold text-gray-800 mt-4 mb-2">New Customers</Text>
-            <FlatList
-              data={newCustomers}
-              renderItem={({ item }) => renderListItem({
-                item,
-                type: 'user',
-                onPress: () => navigation.navigate('AdminUserDetail', { user: item, users })
-              })}
-              keyExtractor={item => item.uid}
-              ListEmptyComponent={<Text className="text-gray-600 text-center">No customers</Text>}
-            />
-            <Text className="text-sm font-semibold text-gray-800 mt-4 mb-2">Low Stock Alerts</Text>
-            <FlatList
-              data={lowStockAlerts}
-              renderItem={({ item }) => renderListItem({
-                item,
-                type: 'product',
-                onPress: () => navigation.navigate('AdminItemDetail', { item })
-              })}
-              keyExtractor={item => item.id}
-              ListEmptyComponent={<Text className="text-gray-600 text-center">No alerts</Text>}
-            />
-            <Text className="text-sm font-semibold text-gray-800 mt-4 mb-2">New Reviews/Ratings</Text>
-            <FlatList
-              data={reviews}
-              renderItem={({ item }) => renderListItem({ item, type: 'review' })}
-              keyExtractor={item => item.reviewId || `${item.createdAt}_${item.rating}`}
-              ListEmptyComponent={<Text className="text-gray-600 text-center">No reviews</Text>}
-            />
-          </View>
-
-          {/* Quick Actions and Shortcuts */}
-          <View className="bg-white rounded-xl p-4">
-            <Text className="text-lg font-bold text-gray-800 mb-4">Quick Actions</Text>
-            <View className="flex-row items-center border border-gray-300 rounded-lg p-3 mb-4">
-              <TextInput
-                className="flex-1 text-base text-gray-800"
-                value={searchQuery}
-                onChangeText={setSearchQuery}
-                placeholder="Search orders, customers, products..."
-                accessibilityLabel="Search input"
-              />
-              <TouchableOpacity onPress={handleSearch} accessibilityLabel="Search button">
-                <Feather name="search" size={20} color="#333" />
-              </TouchableOpacity>
-            </View>
-            <View className="flex-row flex-wrap justify-between">
-              <TouchableOpacity
-                className="flex-1 bg-blue-600 py-3 rounded-lg items-center mx-1 mb-2"
-                onPress={() => navigation.navigate('AdminItemDetail', { item: { id: '', name: '', stock: 0, price: 0, createdAt: new Date().toISOString(), sales: 0, reviews: [] } })}
-                accessibilityLabel="Add new product"
-              >
-                <Text className="text-white text-base font-semibold">Add New Product</Text>
-              </TouchableOpacity>
-              <TouchableOpacity
-                className="flex-1 bg-blue-600 py-3 rounded-lg items-center mx-1 mb-2"
-                onPress={() => navigation.navigate('AdminOrders')}
-                accessibilityLabel="View all orders"
-              >
-                <Text className="text-white text-base font-semibold">View All Orders</Text>
-              </TouchableOpacity>
-              <TouchableOpacity
-                className="flex-1 bg-blue-600 py-3 rounded-lg items-center mx-1 mb-2"
-                onPress={() => navigation.navigate('AdminUserDetail', { users })}
-                accessibilityLabel="Manage users"
-              >
-                <Text className="text-white text-base font-semibold">Manage Users</Text>
-              </TouchableOpacity>
-              <TouchableOpacity
-                className="flex-1 bg-blue-600 py-3 rounded-lg items-center mx-1 mb-2"
-                onPress={() => navigation.navigate('AdminOrders', { filter: 'New' })}
-                accessibilityLabel="Process new orders"
-              >
-                <Text className="text-white text-base font-semibold">Process New Orders</Text>
-              </TouchableOpacity>
-            </View>
-          </View>
-        </ScrollView>
+    <SafeAreaView className="flex-1 bg-gray-100" edges={['left', 'right']}>
+      <View className='flex-row items-center p-3 bg-white border-b border-gray-200'>
+        {/* Search Bar */}
+        <View className="flex-row items-center border border-gray-300 rounded-lg px-3 py-2 bg-gray-50">
+          <Feather name="search" size={20} className="text-gray-500 mr-2" />
+          <TextInput
+            className="flex-1 text-gray-800"
+            placeholder="Search orders, customers, products..."
+            value={searchQuery}
+            onChangeText={setSearchQuery}
+            placeholderTextColor="#999"
+          />
+        </View>
       </View>
-      <Toast />
+      <ScrollView className="flex-1 p-4">
+        {renderQuickActions()}
+        {renderSalesOverview()}
+        {renderOrderStatistics()}
+        {renderCustomerInsights()}
+        {renderProductPerformance()}
+        {renderWebsitePerformance()}
+        {renderRecentActivities()}
+
+        {/* Add some bottom padding to the scroll view */}
+        <View className="h-5"></View>
+      </ScrollView>
+
+      <Modal
+        animationType="fade"
+        transparent={true}
+        visible={showDatePicker}
+      >
+        <BlurView intensity={10} tint="light" style={StyleSheet.absoluteFill}>
+          <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: 'rgba(0, 0, 0, 0.4)', }}>
+            <View style={{ width: '85%', backgroundColor: '#000', padding: 20, borderRadius: 12, alignItems: 'center', }}>
+              {showDatePicker && (
+                <DateTimePicker
+                  testID="dateTimePicker"
+                  value={isSettingStartDate ? selectedStartDate : selectedEndDate}
+                  mode="date" // Can be 'date', 'time', 'datetime'
+                  is24Hour={true}
+                  display={Platform.OS === 'ios' ? 'inline' : 'default'} // 'spinner' or 'default' for Android, 'spinner', 'calendar', 'clock' for iOS
+                  onChange={handleDateChange}
+                  maximumDate={new Date()} // Prevent selecting future dates
+                />
+              )}
+            </View>
+          </View>
+        </BlurView>
+      </Modal>
+
+      {/* Date Picker Modal/View */}
+      {/* {showDatePicker && (
+        <DateTimePicker
+          testID="dateTimePicker"
+          value={isSettingStartDate ? selectedStartDate : selectedEndDate}
+          mode="date" // Can be 'date', 'time', 'datetime'
+          is24Hour={true}
+          display={Platform.OS === 'ios' ? 'compact' : 'default'} // 'spinner' or 'default' for Android, 'spinner', 'calendar', 'clock' for iOS
+          onChange={handleDateChange}
+          maximumDate={new Date()} // Prevent selecting future dates
+        />
+      )} */}
+      {/* <DatePicker
+          modal
+          open={showDatePicker}
+          date={isSettingStartDate ? selectedStartDate : selectedEndDate}
+          onConfirm={handleDateChange}
+          onCancel={() => {
+            setShowDatePicker(false)
+          }}
+        /> */}
     </SafeAreaView>
   );
-};
+}
 
-export default AdminDashboard;
+// You might still need a StyleSheet for Chart Kit if you want complex styles,
+// or manage them via chartConfig props and inline styles.
+// For NativeWind classes, you use the className prop directly.
+// const styles = StyleSheet.create({});
