@@ -12,12 +12,15 @@ import {
   LayoutAnimation,
   UIManager,
   ActivityIndicator,
+  StyleSheet
 } from 'react-native';
 import { Image } from 'expo-image';
 import * as ImagePicker from 'expo-image-picker';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Feather } from '@expo/vector-icons';
-import { categories as staticCategoriesData} from '../../data/staticData';
+import { categories as staticCategoriesData } from '../../data/staticData';
+import { BlurView } from 'expo-blur';
+import { TouchableWithoutFeedback } from 'react-native-web';
 
 // Custom deep copy function
 const deepCopy = (obj) => {
@@ -199,8 +202,8 @@ export default function AdminCategories({ navigation }) {
         productCount: category.items
           ? category.items.length
           : category.subcategories
-          ? category.subcategories.reduce((sum, sub) => sum + (sub.items ? sub.items.length : 0), 0)
-          : 0,
+            ? category.subcategories.reduce((sum, sub) => sum + (sub.items ? sub.items.length : 0), 0)
+            : 0,
         subCategoryCount: category.subcategories ? category.subcategories.length : 0,
       });
     }
@@ -242,7 +245,7 @@ export default function AdminCategories({ navigation }) {
     const dummyIcons = ['folder', 'shopping-bag', 'coffee', 'heart', 'home', 'zap', 'tool', 'watch', 'feather'];
     const randomIcon = dummyIcons[Math.floor(Math.random() * dummyIcons.length)];
     setCategoryData(prev => ({ ...prev, iconName: randomIcon }));
-    Alert.alert('Icon Selected', `Selected icon: ${randomIcon}`);
+    // Alert.alert('Icon Selected', `Selected icon: ${randomIcon}`);
   };
 
   // Save category
@@ -420,51 +423,52 @@ export default function AdminCategories({ navigation }) {
   // Sorting modal
   const renderSortingModal = () => (
     <Modal
-      animationType="fade"
+      animationType="none"
       transparent={true}
       visible={isSortingModalVisible}
       onRequestClose={() => setIsSortingModalVisible(false)}
     >
-      <TouchableOpacity
-        className="flex-1 bg-black bg-opacity-50 justify-center items-center"
-        style={{backgroundColor: '#ccc'}}
-        onPress={() => setIsSortingModalVisible(false)}
-        activeOpacity={1}
-      >
-        <View className="bg-white rounded-lg p-4 w-64" onStartShouldSetResponder={() => true}>
-          <Text className="text-lg font-bold text-gray-800 mb-4">Sort Subcategories By</Text>
-          {['name', 'productCount'].map(option => (
-            <TouchableOpacity
-              key={option}
-              onPress={() => {
-                setSortBy(option);
-                setSortOrder('asc');
-                setIsSortingModalVisible(false);
-              }}
-              className="py-2 border-b border-gray-200 last:border-b-0"
-            >
-              <Text className={`text-base ${sortBy === option && sortOrder === 'asc' ? 'text-blue-600 font-semibold' : 'text-gray-700'}`}>
-                {option === 'name' ? 'Name (A-Z)' : 'Product Count (Low to High)'}
-              </Text>
-            </TouchableOpacity>
-          ))}
-          {['name', 'productCount'].map(option => (
-            <TouchableOpacity
-              key={option + '_desc'}
-              onPress={() => {
-                setSortBy(option);
-                setSortOrder('desc');
-                setIsSortingModalVisible(false);
-              }}
-              className="py-2 border-b border-gray-200 last:border-b-0"
-            >
-              <Text className={`text-base ${sortBy === option && sortOrder === 'desc' ? 'text-blue-600 font-semibold' : 'text-gray-700'}`}>
-                {option === 'name' ? 'Name (Z-A)' : 'Product Count (High to Low)'}
-              </Text>
-            </TouchableOpacity>
-          ))}
-        </View>
-      </TouchableOpacity>
+      <BlurView intensity={10} tint="light" style={StyleSheet.absoluteFill} >
+        <TouchableOpacity
+          style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: 'rgba(0, 0, 0, 0.4)' }}
+          onPress={() => setIsSortingModalVisible(false)}
+        >
+          <View style={{ width: '85%', backgroundColor: '#fff', padding: 20, borderRadius: 12, alignItems: 'center', }}>
+            <Text className="text-lg font-bold text-gray-800 mb-4">Sort Subcategories By</Text>
+            {['name', 'productCount'].map(option => (
+              <TouchableOpacity
+                key={option}
+                onPress={() => {
+                  setSortBy(option);
+                  setSortOrder('asc');
+                  setIsSortingModalVisible(false);
+                }}
+                className="py-2 border-b border-gray-200 last:border-b-0"
+              >
+                <Text className={`text-base ${sortBy === option && sortOrder === 'asc' ? 'text-blue-600 font-semibold' : 'text-gray-700'}`}>
+                  {option === 'name' ? 'Name (A-Z)' : 'Product Count (Low to High)'}
+                </Text>
+              </TouchableOpacity>
+            ))}
+            {['name', 'productCount'].map(option => (
+              <TouchableOpacity
+                key={option + '_desc'}
+                onPress={() => {
+                  setSortBy(option);
+                  setSortOrder('desc');
+                  setIsSortingModalVisible(false);
+                }}
+                className="py-2 border-b border-gray-200 last:border-b-0"
+              >
+                <Text className={`text-base ${sortBy === option && sortOrder === 'desc' ? 'text-blue-600 font-semibold' : 'text-gray-700'}`}>
+                  {option === 'name' ? 'Name (Z-A)' : 'Product Count (High to Low)'}
+                </Text>
+              </TouchableOpacity>
+            ))}
+          </View>
+        </TouchableOpacity>
+      </BlurView>
+
     </Modal>
   );
 
@@ -568,8 +572,8 @@ export default function AdminCategories({ navigation }) {
         visible={modalVisible}
         onRequestClose={closeModal}
       >
-        <SafeAreaView className="flex-1 bg-gray-100">
-          <View className="flex-row justify-between items-center p-4 bg-white border-b border-gray-200">
+        <SafeAreaView className="flex-1 bg-white" edges={['left', 'right']}>
+          <View style={{ marginTop: 40 }} className="flex-row justify-between items-center p-4 bg-white border-b border-gray-200">
             <Text className="text-lg font-bold text-gray-800">{modalTitle}</Text>
             <TouchableOpacity onPress={closeModal} className="p-1" accessibilityRole="button" accessibilityLabel="Close modal">
               <Feather name="x" size={24} color="#6b7280" />
@@ -592,7 +596,7 @@ export default function AdminCategories({ navigation }) {
               </Text>
             </View>
           ) : (
-            <ScrollView className="flex-1 p-4">
+            <ScrollView className="flex-1 p-4 bg-gray-100">
               {!isMainCategoryOperation && (
                 <>
                   <Text className="text-sm font-semibold text-gray-700 mb-2">Parent Category</Text>
@@ -608,7 +612,7 @@ export default function AdminCategories({ navigation }) {
                 {isMainCategoryOperation ? 'Main Category Name' : 'Category Name'}
               </Text>
               <TextInput
-                className="border border-gray-300 rounded-lg p-3 text-base mb-4 bg-white text-gray-800"
+                className="border border-gray-300 rounded-lg p-3 text-balance mb-4 bg-white text-gray-800"
                 value={categoryData.name}
                 onChangeText={text => setCategoryData({ ...categoryData, name: text })}
                 placeholder={isMainCategoryOperation ? 'e.g. Electronics' : 'e.g. Smartphones'}
@@ -618,16 +622,19 @@ export default function AdminCategories({ navigation }) {
               {isMainCategoryOperation && (
                 <>
                   <Text className="text-sm font-semibold text-gray-700 mb-2">Icon</Text>
-                  <TouchableOpacity
-                    className="border border-gray-300 rounded-lg p-3 text-base mb-4 bg-white flex-row items-center justify-between"
-                    onPress={handleIconPick}
-                    accessibilityRole="button"
-                    accessibilityLabel="Select icon"
-                  >
-                    <Text className="text-gray-800">{categoryData.iconName || 'Select Icon'}</Text>
-                    {categoryData.iconName && <Feather name={categoryData.iconName} size={20} color="#374151" />}
-                    <Feather name="chevron-right" size={20} color="#6b7280" />
-                  </TouchableOpacity>
+                  <View className='flex-row items-center'>
+                    <TouchableOpacity
+                      className="flex-1 border border-gray-300 rounded-lg p-3 text-base mb-4 bg-white flex-row items-center justify-between"
+                      onPress={handleIconPick}
+                      accessibilityRole="button"
+                      accessibilityLabel="Select icon"
+                    >
+                      <Text className="text-gray-800">{categoryData.iconName || 'Select Icon'}</Text>
+                      <Feather name="chevron-right" size={20} color="#6b7280" />
+                    </TouchableOpacity>
+                    <Feather name={categoryData.iconName} size={40} color="#374151" className='ml-4 mb-4' />
+                  </View>
+
                 </>
               )}
               <Text className="text-sm font-semibold text-gray-700 mb-2">Description (Optional)</Text>
@@ -652,7 +659,8 @@ export default function AdminCategories({ navigation }) {
                 {categoryData.image ? (
                   <Image
                     source={typeof categoryData.image === 'string' ? { uri: categoryData.image } : categoryData.image}
-                    className="w-full h-full"
+                    className="w-80 h-80"
+                    style={{ width: 80, height: 80 }}
                     contentFit="cover"
                     placeholder={{ uri: 'https://via.placeholder.com/128' }}
                   />
@@ -675,31 +683,33 @@ export default function AdminCategories({ navigation }) {
               </TouchableOpacity>
             </ScrollView>
           )}
-          <View className="p-4 bg-white border-t border-gray-200 flex-row justify-between items-center">
+          <View
+            style={{ paddingTop: 10, paddingBottom: 25, paddingHorizontal: 20 }}
+            className="bg-white border-t border-gray-200 flex-row justify-between items-center">
             {isConfirmDeleteMode ? (
               <>
                 <TouchableOpacity
-                  className="flex-1 bg-gray-400 rounded-lg px-4 py-3 mr-2 items-center justify-center"
-                  onPress={closeModal}
-                  accessibilityRole="button"
-                  accessibilityLabel="Cancel deletion"
-                >
-                  <Text className="text-white text-base font-semibold">Cancel</Text>
-                </TouchableOpacity>
-                <TouchableOpacity
-                  className="flex-1 bg-red-600 rounded-lg px-4 py-3 ml-2 items-center justify-center"
+                  className="flex-1 bg-red-600 rounded-lg px-4 py-3 mr-2 items-center justify-center"
                   onPress={handleDelete}
                   accessibilityRole="button"
                   accessibilityLabel="Confirm deletion"
                 >
                   <Text className="text-white text-base font-semibold">Delete</Text>
                 </TouchableOpacity>
+                <TouchableOpacity
+                  className="flex-1 bg-gray-400 rounded-lg px-4 py-3 ml-2 items-center justify-center"
+                  onPress={closeModal}
+                  accessibilityRole="button"
+                  accessibilityLabel="Cancel deletion"
+                >
+                  <Text className="text-white text-base font-semibold">Cancel</Text>
+                </TouchableOpacity>
               </>
             ) : (
               <>
                 {isEditMode && (
                   <TouchableOpacity
-                    className="flex-1 bg-red-500 rounded-lg px-4 py-3 mr-2 items-center justify-center"
+                    className="flex-1 bg-red-500 rounded-lg px-4 py-3 basis-1/3 mr-2 items-center justify-center"
                     onPress={() => openModal('confirm_delete', categoryData, parentMainCategoryForSub)}
                     accessibilityRole="button"
                     accessibilityLabel="Delete category"
@@ -708,26 +718,26 @@ export default function AdminCategories({ navigation }) {
                   </TouchableOpacity>
                 )}
                 <TouchableOpacity
-                  className={`flex-1 ${isEditMode ? 'basis-1/3 mx-1' : 'basis-1/2 mr-1'} bg-gray-400 rounded-lg px-4 py-3 items-center justify-center`}
-                  onPress={closeModal}
-                  accessibilityRole="button"
-                  accessibilityLabel="Cancel"
-                >
-                  <Text className="text-white text-base font-semibold">Cancel</Text>
-                </TouchableOpacity>
-                <TouchableOpacity
-                  className={`flex-1 ${isEditMode ? 'basis-1/3 ml-1' : 'basis-1/2 ml-1'} bg-blue-600 rounded-lg px-4 py-3 items-center justify-center`}
+                  className={`flex-1 ${isEditMode ? 'basis-1/3' : 'basis-1/2'} mr-2 bg-blue-600 rounded-lg px-4 py-3 items-center justify-center`}
                   onPress={handleSave}
                   accessibilityRole="button"
                   accessibilityLabel={isEditMode ? 'Update category' : 'Save category'}
                 >
                   <Text className="text-white text-base font-semibold">{isEditMode ? 'Update' : 'Save'}</Text>
                 </TouchableOpacity>
+                <TouchableOpacity
+                  className={`flex-1 ${isEditMode ? 'basis-1/3' : 'basis-1/2'} bg-gray-400 rounded-lg px-4 py-3 items-center justify-center`}
+                  onPress={closeModal}
+                  accessibilityRole="button"
+                  accessibilityLabel="Cancel"
+                >
+                  <Text className="text-white text-base font-semibold">Cancel</Text>
+                </TouchableOpacity>
               </>
             )}
           </View>
           {loading && (
-            <View className="absolute inset-0 bg-black bg-opacity-30 justify-center items-center">
+            <View className="absolute inset-0 bg-opacity-30 justify-center items-center" style={{ backgroundColor: 'rgba(0, 0, 0, 0.6)' }}>
               <ActivityIndicator size="large" color="#fff" />
             </View>
           )}
@@ -738,28 +748,28 @@ export default function AdminCategories({ navigation }) {
 
   return (
     <SafeAreaView className="flex-1 bg-gray-100" edges={['left', 'right']}>
-        {/* <Text className="text-2xl font-bold text-gray-800 mb-4">Category Management</Text> */}
-        <View className="flex-row items-center p-3 bg-white border-b border-gray-200">
-          <View className="flex-1 flex-row items-center border border-gray-300 rounded-lg px-3 py-2 bg-gray-50 mr-2">
-            <Feather name="search" size={20} color="#6b7280" />
-            <TextInput
-              className="flex-1 text-gray-800 ml-2"
-              placeholder="Search categories..."
-              value={searchQuery}
-              onChangeText={setSearchQuery}
-              placeholderTextColor="#999"
-              accessibilityLabel="Search categories"
-            />
-          </View>
-          <TouchableOpacity
-            onPress={() => setIsSortingModalVisible(true)}
-            className="p-2 rounded-lg bg-gray-200"
-            accessibilityRole="button"
-            accessibilityLabel="Sort options"
-          >
-            <Feather name="chevrons-up" size={20} color="#374151" />
-          </TouchableOpacity>
+      {/* <Text className="text-2xl font-bold text-gray-800 mb-4">Category Management</Text> */}
+      <View className="flex-row items-center p-3 bg-white border-b border-gray-200">
+        <View className="flex-1 flex-row items-center border border-gray-300 rounded-lg px-3 py-2 bg-gray-50 mr-2">
+          <Feather name="search" size={20} color="#6b7280" />
+          <TextInput
+            className="flex-1 text-gray-800 ml-2"
+            placeholder="Search categories..."
+            value={searchQuery}
+            onChangeText={setSearchQuery}
+            placeholderTextColor="#999"
+            accessibilityLabel="Search categories"
+          />
         </View>
+        <TouchableOpacity
+          onPress={() => setIsSortingModalVisible(true)}
+          className="p-2 rounded-lg bg-gray-200"
+          accessibilityRole="button"
+          accessibilityLabel="Sort options"
+        >
+          <Feather name="chevrons-up" size={20} color="#374151" />
+        </TouchableOpacity>
+      </View>
       {loading && !modalVisible ? (
         <View className="flex-1 justify-center items-center">
           <ActivityIndicator size="large" color="#0000ff" />
@@ -790,7 +800,7 @@ export default function AdminCategories({ navigation }) {
         onPress={() => openModal('add_main')}
         accessibilityRole="button"
         accessibilityLabel="Add new main category"
-        style={{bottom: 6, right: 6}}
+        style={{ bottom: 6, right: 6 }}
       >
         <Feather name="plus" size={24} color="white" />
       </TouchableOpacity>
