@@ -7,13 +7,14 @@ export default function Splash({ navigation }) {
     <View style={styles.container}>
       <View style={styles.imgView}>
         <LogoIMG width={100} height={100} style={styles.image} />
-        <Button
+        {/* <Button
           title="Go to Onboarding"
-          onPress={() => navigation.navigate('Onboarding')}></Button>
-          <Button
+          onPress={() => navigation.navigate('Onboarding')}></Button> */}
+        <Button
           title="Go to Customer App"
+          style={{marginBottom: 30}}
           onPress={() => navigation.navigate('Main')}></Button>
-          <Button
+        <Button
           title="Go to Admin App"
           onPress={() => navigation.navigate('AdminMain')}></Button>
       </View>
@@ -44,7 +45,7 @@ const styles = StyleSheet.create({
   },
   imageVegetable: {
     marginBottom: -70,
-    marginRight:-20,
+    marginRight: -20,
     transform: [{ rotate: '-14.82deg' }], // 🔄 rotation
   },
 });

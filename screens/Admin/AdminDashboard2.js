@@ -9,11 +9,14 @@ import {
   Platform,
   Dimensions,
   StyleSheet, // Needed for chart kit styles if not using className directly
+  Modal
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Feather } from '@expo/vector-icons';
 import { LineChart, BarChart, PieChart } from 'react-native-chart-kit'; // Added PieChart
 import DateTimePicker from '@react-native-community/datetimepicker'; // For date picker
+import { BlurView } from 'expo-blur';
+// import DatePicker from 'react-native-date-picker'
 
 // --- Dummy Data (Replace with your API calls) ---
 // Use numbers for chart data
@@ -37,6 +40,7 @@ const DUMMY_ORDER_STATS = {
   processingOrders: 25,
   shippedOrders: 140,
   cancelledOrders: 5,
+  returnOrders: 10,
   // Data for Pie Chart
   orderStatusDistribution: [
     { name: 'New', count: 12, color: '#4ade80', legendFontColor: '#7F7F7F', legendFontSize: 10 }, // green-400
@@ -44,6 +48,7 @@ const DUMMY_ORDER_STATS = {
     { name: 'Processing', count: 25, color: '#60a5fa', legendFontColor: '#7F7F7F', legendFontSize: 10 }, // blue-400
     { name: 'Shipped', count: 140, color: '#a78bfa', legendFontColor: '#7F7F7F', legendFontSize: 10 }, // purple-400
     { name: 'Cancelled', count: 5, color: '#f87171', legendFontColor: '#7F7F7F', legendFontSize: 10 }, // red-400
+    { name: 'Return', count: 10, color: '#26A69A', legendFontColor: '#7F7F7F', legendFontSize: 10 }, // orange-400
   ]
 };
 
@@ -140,7 +145,7 @@ export default function AdminDashboard2({ navigation }) {
   const [isSettingStartDate, setIsSettingStartDate] = useState(true); // True if setting start date, false for end date
 
   const screenWidth = Dimensions.get('window').width;
-  const chartWidth = screenWidth - 32; // Account for p-4 (16 units padding on each side)
+  const chartWidth = screenWidth - 60; // Account for p-4 (16 units padding on each side)
 
   // In a real app, you would fetch data based on selectedStartDate and selectedEndDate
   useEffect(() => {
@@ -151,7 +156,7 @@ export default function AdminDashboard2({ navigation }) {
   }, [selectedStartDate, selectedEndDate]); // Re-run effect when dates change
 
   const handleDateChange = (event, date) => {
-    setShowDatePicker(Platform.OS === 'ios'); // Hide picker on Android after selection
+    setShowDatePicker(false); // Hide picker on Android after selection
     if (date) {
       if (isSettingStartDate) {
         setSelectedStartDate(date);
@@ -193,7 +198,7 @@ export default function AdminDashboard2({ navigation }) {
 
   const renderSalesOverview = () => (
     <View className="bg-white rounded-lg p-4 mb-6">
-      <View className="flex-row items-center justify-between mb-4">
+      <View className="flex-row items-center justify-between mb-4 border-b border-gray-50 pb-3">
         <View className="flex-row items-center">
           <Feather name="dollar-sign" size={20} className="text-green-600 mr-2" />
           <Text className="text-lg font-bold text-gray-800">Sales Overview</Text>
@@ -203,7 +208,7 @@ export default function AdminDashboard2({ navigation }) {
           <TouchableOpacity onPress={showStartDatePicker} className="px-2 py-1 border border-gray-300 rounded-md mr-2">
             <Text className="text-sm text-gray-700">{selectedStartDate.toLocaleDateString()}</Text>
           </TouchableOpacity>
-          <Text className="text-sm text-gray-600">to</Text>
+          <Text className="text-sm text-gray-600">To</Text>
           <TouchableOpacity onPress={showEndDatePicker} className="px-2 py-1 border border-gray-300 rounded-md ml-2">
             <Text className="text-sm text-gray-700">{selectedEndDate.toLocaleDateString()}</Text>
           </TouchableOpacity>
@@ -221,7 +226,7 @@ export default function AdminDashboard2({ navigation }) {
           <ScrollView horizontal showsHorizontalScrollIndicator={false}>
             <LineChart
               data={salesData.salesTrendData}
-              width={Math.max(chartWidth, salesData.salesTrendData.labels.length * 60)} // Ensure minimum width for many labels
+              width={Math.max(chartWidth, salesData.salesTrendData.labels.length * 50)} // Ensure minimum width for many labels
               height={220}
               chartConfig={{
                 backgroundColor: '#ffffff',
@@ -254,7 +259,7 @@ export default function AdminDashboard2({ navigation }) {
 
   const renderOrderStatistics = () => (
     <View className="bg-white rounded-lg p-4 mb-6">
-      <View className="flex-row items-center justify-between mb-4">
+      <View className="flex-row items-center justify-between mb-4 border-b border-gray-50 pb-3">
         <View className="flex-row items-center">
           <Feather name="package" size={20} className="text-blue-600 mr-2" />
           <Text className="text-lg font-bold text-gray-800">Order Statistics</Text>
@@ -268,7 +273,7 @@ export default function AdminDashboard2({ navigation }) {
         <View className="w-1/3 p-1"><MetricCard title="Processing" value={orderStats.processingOrders} iconName="settings" iconColor="text-blue-500" /></View>
         <View className="w-1/3 p-1"><MetricCard title="Shipped" value={orderStats.shippedOrders} iconName="truck" iconColor="text-purple-500" /></View>
         <View className="w-1/3 p-1"><MetricCard title="Cancelled" value={orderStats.cancelledOrders} iconName="x-circle" iconColor="text-red-500" /></View>
-        <View className="w-1/3 p-1"><MetricCard title="Return" value={orderStats.cancelledOrders} iconName="x-circle" iconColor="text-red-500" /></View>
+        <View className="w-1/3 p-1"><MetricCard title="Return" value={orderStats.cancelledOrders} iconName="shuffle" iconColor="text-red-500" /></View>
         {/* Add a filler if needed to make rows even, adjust based on number of metrics */}
         {/* <View className="w-1/2 p-1 opacity-0"></View> */}
       </View>
@@ -297,10 +302,9 @@ export default function AdminDashboard2({ navigation }) {
     </View>
   );
 
-
   const renderCustomerInsights = () => (
     <View className="bg-white rounded-lg p-4 mb-6 ">
-      <View className="flex-row items-center justify-between mb-4">
+      <View className="flex-row items-center justify-between mb-4 border-b border-gray-50 pb-3">
         <View className="flex-row items-center">
           <Feather name="users" size={20} className="text-indigo-600 mr-2" />
           <Text className="text-lg font-bold text-gray-800">Customer Insights</Text>
@@ -320,7 +324,7 @@ export default function AdminDashboard2({ navigation }) {
           <ScrollView horizontal showsHorizontalScrollIndicator={false}>
             <BarChart
               data={customerInsights.customerGrowthData}
-              width={Math.max(chartWidth, customerInsights.customerGrowthData.labels.length * 60)} // Ensure minimum width
+              width={Math.max(chartWidth, customerInsights.customerGrowthData.labels.length * 50)} // Ensure minimum width
               height={220}
               chartConfig={{
                 backgroundColor: '#ffffff',
@@ -357,7 +361,7 @@ export default function AdminDashboard2({ navigation }) {
 
     return (
       <View className="bg-white rounded-lg p-4 mb-6 ">
-        <View className="flex-row items-center mb-4">
+        <View className="flex-row items-center mb-4 border-b border-gray-50 pb-3">
           <Feather name="shopping-cart" size={20} className="text-teal-600 mr-2" />
           <Text className="text-lg font-bold text-gray-800">Product Performance</Text>
         </View>
@@ -369,7 +373,7 @@ export default function AdminDashboard2({ navigation }) {
             <ScrollView horizontal showsHorizontalScrollIndicator={false}>
               <BarChart
                 data={topSellingChartData}
-                width={Math.max(chartWidth, topSellingChartData.labels.length * 80)} // Adjust width based on number of bars
+                width={Math.max(chartWidth, topSellingChartData.labels.length * 50)} // Adjust width based on number of bars
                 height={220}
                 yAxisLabel="$"
                 chartConfig={{
@@ -392,16 +396,6 @@ export default function AdminDashboard2({ navigation }) {
           </View>
         )}
 
-
-        {/* Low Stock Products List */}
-        <View className="mb-4">
-          <Text className="text-base font-semibold text-gray-800 mb-2 text-orange-600">Low Stock Products</Text>
-          {productPerformance.lowStockProducts.map((product) => (
-            <ListItem key={product.id} label={product.name} value={`Stock: ${product.stock}`} />
-          ))}
-          {productPerformance.lowStockProducts.length === 0 && <Text className="text-gray-500 italic">No low stock items.</Text>}
-        </View>
-
         {/* Recently Added Products List */}
         <View>
           <Text className="text-base font-semibold text-gray-800 mb-2">Recently Added Products</Text>
@@ -416,7 +410,7 @@ export default function AdminDashboard2({ navigation }) {
 
   const renderWebsitePerformance = () => (
     <View className="bg-white rounded-lg p-4 mb-6">
-      <View className="flex-row items-center justify-between mb-4">
+      <View className="flex-row items-center justify-between mb-4 border-b border-gray-50 pb-3">
         <View className="flex-row items-center">
           <Feather name="activity" size={20} className="text-pink-600 mr-2" />
           <Text className="text-lg font-bold text-gray-800">Website/App Performance</Text>
@@ -442,7 +436,7 @@ export default function AdminDashboard2({ navigation }) {
 
   const renderRecentActivities = () => (
     <View className="bg-white rounded-lg p-4 mb-6">
-      <View className="flex-row items-center mb-4">
+      <View className="flex-row items-center mb-4 border-b border-gray-50 pb-3">
         <Feather name="bell" size={20} className="text-red-600 mr-2" />
         <Text className="text-lg font-bold text-gray-800">Recent Activities & Notifications</Text>
       </View>
@@ -489,16 +483,9 @@ export default function AdminDashboard2({ navigation }) {
 
   const renderQuickActions = () => (
     <View className="bg-white rounded-lg p-4 mb-6">
-      {/* Search Bar */}
-      <View className="flex-row items-center border border-gray-300 rounded-lg px-3 py-2 bg-gray-50">
-        <Feather name="search" size={20} className="text-gray-500 mr-2" />
-        <TextInput
-          className="flex-1 text-gray-800"
-          placeholder="Search orders, customers, products..."
-          value={searchQuery}
-          onChangeText={setSearchQuery}
-          placeholderTextColor="#999"
-        />
+      <View className="flex-row items-center border-b border-gray-50 pb-3">
+        <Feather name="bookmark" size={20} className="text-green-600 mr-2" />
+        <Text className="text-lg font-bold text-gray-800">Quick Actons</Text>
       </View>
       {/* <Text className="text-lg font-bold text-gray-800 mb-4 mt-3">Quick Actions</Text> */}
       <View className="flex-row flex-wrap justify-between mt-4">
@@ -544,8 +531,20 @@ export default function AdminDashboard2({ navigation }) {
 
 
   return (
-    <SafeAreaView className="flex-1 bg-gray-100">
-
+    <SafeAreaView className="flex-1 bg-gray-100" edges={['left', 'right']}>
+      <View className='flex-row items-center p-3 bg-white border-b border-gray-200'>
+        {/* Search Bar */}
+        <View className="flex-row items-center border border-gray-300 rounded-lg px-3 py-2 bg-gray-50">
+          <Feather name="search" size={20} className="text-gray-500 mr-2" />
+          <TextInput
+            className="flex-1 text-gray-800"
+            placeholder="Search orders, customers, products..."
+            value={searchQuery}
+            onChangeText={setSearchQuery}
+            placeholderTextColor="#999"
+          />
+        </View>
+      </View>
       <ScrollView className="flex-1 p-4">
         {renderQuickActions()}
         {renderSalesOverview()}
@@ -559,18 +558,51 @@ export default function AdminDashboard2({ navigation }) {
         <View className="h-5"></View>
       </ScrollView>
 
+      <Modal
+        animationType="fade"
+        transparent={true}
+        visible={showDatePicker}
+      >
+        <BlurView intensity={10} tint="light" style={StyleSheet.absoluteFill}>
+          <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: 'rgba(0, 0, 0, 0.4)', }}>
+            <View style={{ width: '85%', backgroundColor: '#000', padding: 20, borderRadius: 12, alignItems: 'center', }}>
+              {showDatePicker && (
+                <DateTimePicker
+                  testID="dateTimePicker"
+                  value={isSettingStartDate ? selectedStartDate : selectedEndDate}
+                  mode="date" // Can be 'date', 'time', 'datetime'
+                  is24Hour={true}
+                  display={Platform.OS === 'ios' ? 'inline' : 'default'} // 'spinner' or 'default' for Android, 'spinner', 'calendar', 'clock' for iOS
+                  onChange={handleDateChange}
+                  maximumDate={new Date()} // Prevent selecting future dates
+                />
+              )}
+            </View>
+          </View>
+        </BlurView>
+      </Modal>
+
       {/* Date Picker Modal/View */}
-      {showDatePicker && (
+      {/* {showDatePicker && (
         <DateTimePicker
           testID="dateTimePicker"
           value={isSettingStartDate ? selectedStartDate : selectedEndDate}
           mode="date" // Can be 'date', 'time', 'datetime'
           is24Hour={true}
-          display={Platform.OS === 'ios' ? 'spinner' : 'default'} // 'spinner' or 'default' for Android, 'spinner', 'calendar', 'clock' for iOS
+          display={Platform.OS === 'ios' ? 'compact' : 'default'} // 'spinner' or 'default' for Android, 'spinner', 'calendar', 'clock' for iOS
           onChange={handleDateChange}
           maximumDate={new Date()} // Prevent selecting future dates
         />
-      )}
+      )} */}
+      {/* <DatePicker
+          modal
+          open={showDatePicker}
+          date={isSettingStartDate ? selectedStartDate : selectedEndDate}
+          onConfirm={handleDateChange}
+          onCancel={() => {
+            setShowDatePicker(false)
+          }}
+        /> */}
     </SafeAreaView>
   );
 }

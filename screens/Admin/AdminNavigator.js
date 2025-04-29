@@ -20,7 +20,7 @@ const AdminStack = createStackNavigator();
 
 const tabs = {
   dashboard: {name: "AdminDashboard", title: "Dashboard", icon: "pie-chart"},
-  dashboard2: {name: "AdminDashboard2", title: "Dashboard2", icon: "pie-chart"},
+  dashboard2: {name: "AdminDashboard2", title: "Dashboard", icon: "pie-chart"},
   products: {name: "AdminProducts", title: "Products", icon: "archive"},
   orders: {name: "AdminOrders", title: "Orders", icon: "book-open"},
   users: {name: "AdminUsers", title: "Users", icon: "users"},
@@ -48,7 +48,7 @@ function TabNavigator() {
           else if (route.name === tabs.orders.title) iconName = tabs.orders.icon;
           else if (route.name === tabs.users.title) iconName = tabs.users.icon;
           else if (route.name === tabs.more.title) iconName = tabs.more.icon;
-          return <Feather name={iconName} size={size} color={color} />;
+          return <Feather name={iconName} size={20} color={color} />;
         },
         tabBarActiveTintColor: '#5ac268',
         tabBarInactiveTintColor: '#666',
@@ -61,14 +61,14 @@ function TabNavigator() {
           shadowRadius: 4,
         },
         tabBarLabelStyle: {
-          fontSize: 12,
+          fontSize: 11,
           fontWeight: '500',
-          marginBottom: 5,
+          marginBottom: 10,
         },
         header: ({ navigation, route }) => <CustomHeader navigation={navigation} route={route} />,
       })}
     >
-      <AdminTab.Screen name={tabs.dashboard.title} component={AdminDashboard} />
+      
       <AdminTab.Screen name={tabs.dashboard2.title} component={AdminDashboard2} />
       <AdminTab.Screen name={tabs.products.title} component={AdminProducts} />
       <AdminTab.Screen name={tabs.orders.title} component={AdminOrders} />
@@ -104,15 +104,15 @@ const headerStyles = StyleSheet.create({
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 4,
-    height: 75,
-    maxHeight: 75,
+    height: 50,
+    maxHeight: 50,
   },
   titleContainer: {
     flex: 1,
     alignItems: 'center',
   },
   title: {
-    fontSize: 22,
+    fontSize: 16,
     fontWeight: '700',
     color: '#333',
   },
