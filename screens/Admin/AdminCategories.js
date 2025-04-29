@@ -416,8 +416,8 @@ export default function AdminCategories({ navigation }) {
 
   // View products
   const handleViewProducts = (mainCategory, subCategory) => {
-    //navigation.navigate('AdminProductList', { mainCategory, subCategoryId: subCategory.id });
-    navigation.navigate('AdminProductList');
+    navigation.navigate('AdminProductList', { mainCategory, subCategoryId: subCategory.id });
+    //navigation.navigate('AdminProductList');
   };
 
   // Sorting modal

@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useCallback } from 'react';
+import React, { useState, useMemo, useCallback, useEffect } from 'react';
 import {
   View,
   Text,
@@ -88,7 +88,15 @@ const INITIAL_PRODUCTS = [
   },
 ];
 
-const AdminProductList = ({ navigation }) => {
+const AdminProductList = ({ navigation, route }) => {
+  const { mainCategory, subCategoryId } = route.params;
+  const [selectedSubCategoryId, setSelectedSubCategoryId] = useState(subCategoryId);
+
+  // Get subcategories and items
+  const subCategories = mainCategory.subcategories || [];
+  const selectedSubCategory = subCategories.find(sub => sub.id === selectedSubCategoryId);
+  const items = selectedSubCategory ? selectedSubCategory.items : [];
+
   const [products, setProducts] = useState(INITIAL_PRODUCTS);
   const [viewMode, setViewMode] = useState('list'); // 'list' or 'grid'
   const [searchQuery, setSearchQuery] = useState('');
@@ -111,6 +119,13 @@ const AdminProductList = ({ navigation }) => {
   const [showSaleDatePicker, setShowSaleDatePicker] = useState(false);
   const [isSettingSaleStart, setIsSettingSaleStart] = useState(true);
   const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    // Preload images
+    Image.prefetch(
+      Object.values(subCategories).map((category) => category.image)
+    );
+  }, []);
 
   // Product Form State
   const [productForm, setProductForm] = useState({
@@ -333,10 +348,10 @@ const AdminProductList = ({ navigation }) => {
               prev.map(p =>
                 p.id === product.id
                   ? {
-                      ...p,
-                      status: p.status === 'Published' ? 'Draft' : 'Published',
-                      history: [...p.history, { action: 'Status Changed', timestamp: new Date().toISOString(), by: 'Admin' }],
-                    }
+                    ...p,
+                    status: p.status === 'Published' ? 'Draft' : 'Published',
+                    history: [...p.history, { action: 'Status Changed', timestamp: new Date().toISOString(), by: 'Admin' }],
+                  }
                   : p
               )
             );
@@ -391,10 +406,10 @@ const AdminProductList = ({ navigation }) => {
       prev.map(p =>
         selectedProductIds.includes(p.id)
           ? {
-              ...p,
-              [field]: field === 'price' ? p.price * (1 + value / 100) : value,
-              history: [...p.history, { action: `Bulk ${field} Update`, timestamp: new Date().toISOString(), by: 'Admin' }],
-            }
+            ...p,
+            [field]: field === 'price' ? p.price * (1 + value / 100) : value,
+            history: [...p.history, { action: `Bulk ${field} Update`, timestamp: new Date().toISOString(), by: 'Admin' }],
+          }
           : p
       )
     );
@@ -450,8 +465,8 @@ const AdminProductList = ({ navigation }) => {
     const isSelected = selectedProductIds.includes(item.id);
     const stockStatus =
       item.stock === 0 ? 'bg-red-600' :
-      item.stock <= item.lowStockThreshold ? 'bg-yellow-600' :
-      'bg-green-600';
+        item.stock <= item.lowStockThreshold ? 'bg-yellow-600' :
+          'bg-green-600';
     return viewMode === 'list' ? (
       <View className={`flex-row items-center border-b border-gray-200 py-3 px-4 bg-white ${isSelected ? 'bg-blue-100' : ''}`}>
         <TouchableOpacity onPress={() => handleSelectProduct(item.id)} className="p-2">
@@ -1020,7 +1035,18 @@ const AdminProductList = ({ navigation }) => {
   );
 
   return (
-    <SafeAreaView className="flex-1 bg-gray-100">
+    <SafeAreaView className="flex-1 bg-gray-100" edges={['left', 'right']}>
+      <View className='flex-row items-center justify-between bg-white p-4 border-b border-gray-100'>
+        <TouchableOpacity onPress={() => navigation.goBack()}>
+          <Feather name="arrow-le
+          ft" size={24} color="#333" />
+        </TouchableOpacity>
+        <View className='flex-1 ml-auto'>
+          <Text style={{ fontSize: 16, fontWeight: '700', color: '#333' }}>Products</Text>
+          <Text style={{ fontSize: 16, fontWeight: '700', color: '#333' }}>Products</Text>
+        </View>
+        <View></View>
+      </View>
       <View className="flex-row items-center p-4 bg-white border-b border-gray-200">
         <View className="flex-1 flex-row items-center border border-gray-300 rounded-lg px-3 py-2 bg-gray-50 mr-2">
           <Feather name="search" size={20} color="#6b7280" style={{ marginRight: 8 }} />
