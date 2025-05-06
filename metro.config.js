@@ -21,6 +21,7 @@ config.transformer.babelTransformerPath = require.resolve('react-native-svg-tran
 config.resolver.assetExts = config.resolver.assetExts.filter(ext => ext !== 'svg').concat(['html']); // Include HTML assets
 config.resolver.sourceExts = [...config.resolver.sourceExts, 'svg', 'css', 'cjs']; // Add css for NativeWind, svg, and cjs
 
+config.resolver.unstable_enablePackageExports = false;
 // Asset handling
 config.transformer.assetPlugins = ['expo-asset/tools/hashAssetFiles'];
 module.exports = withNativeWind(config,{ input: "./global.css" });

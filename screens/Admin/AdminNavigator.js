@@ -10,8 +10,11 @@ import AdminOrders from './AdminOrders';
 import AdminUsers from './AdminUsers';
 import AdminMore from './AdminMore';
 import AdminProductList from './AdminProductList';
+import AdminProductDetail from './AdminProductDetail';
 import AdminItemDetail from './AdminItemDetail';
 import AdminUserDetail from './AdminUserDetail';
+import AdminOrderDetail from './AdminOrderDetail';
+import AdminOrdersList from './AdminOrdersList';
 
 
 const AdminTab = createBottomTabNavigator();
@@ -68,7 +71,7 @@ function TabNavigator() {
       
       <AdminTab.Screen name={tabs.dashboard.title} component={AdminDashboard} />
       <AdminTab.Screen name={tabs.categories.title} component={AdminCategories} />
-      <AdminTab.Screen name={tabs.orders.title} component={AdminOrders} />
+      <AdminTab.Screen name={tabs.orders.title} component={AdminOrdersList} />
       <AdminTab.Screen name={tabs.users.title} component={AdminUsers} />
       <AdminTab.Screen name={tabs.more.title} component={AdminMore} />
     </AdminTab.Navigator>
@@ -80,8 +83,10 @@ export default function AdminNavigator({ navigation }) {
       <AdminStack.Navigator initialRouteName="AdminMain" screenOptions={{ headerShown: false }}>
         <AdminStack.Screen name="AdminMain" component={TabNavigator} />
         <AdminStack.Screen name="AdminProductList" component={AdminProductList} />
+        <AdminStack.Screen name="AdminProductDetail" component={AdminProductDetail} />
         <AdminStack.Screen name="AdminItemDetail" component={AdminItemDetail} />
         <AdminStack.Screen name="AdminUserDetail" component={AdminUserDetail} />
+        <AdminStack.Screen name="AdminOrderDetail" component={AdminOrderDetail} />
       </AdminStack.Navigator>
   );
 }
