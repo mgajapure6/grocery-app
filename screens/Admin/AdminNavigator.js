@@ -8,13 +8,20 @@ import AdminDashboard from './AdminDashboard';
 import AdminCategories from './AdminCategories';
 import AdminOrders from './AdminOrders';
 import AdminUsers from './AdminUsers';
-import AdminMore from './AdminMore';
+import AdminMoreOptions from './AdminMoreOptions';
 import AdminProductList from './AdminProductList';
 import AdminProductDetail from './AdminProductDetail';
 import AdminItemDetail from './AdminItemDetail';
 import AdminUserDetail from './AdminUserDetail';
 import AdminOrderDetail from './AdminOrderDetail';
 import AdminOrdersList from './AdminOrdersList';
+import AdminInventoryLocations from  './AdminMore/AdminInventoryLocations';
+import AdminProductBrands from  './AdminMore/AdminProductBrands';
+import AdminProductTags from  './AdminMore/AdminProductTags';
+import AdminPromotions from  './AdminMore/AdminPromotions';
+import AdminShippingOptions from  './AdminMore/AdminShippingOptions';
+import AdminStoreSettings from  './AdminMore/AdminStoreSettings';
+import AdminTaxRates from  './AdminMore/AdminTaxRates';
 
 
 const AdminTab = createBottomTabNavigator();
@@ -73,7 +80,7 @@ function TabNavigator() {
       <AdminTab.Screen name={tabs.categories.title} component={AdminCategories} />
       <AdminTab.Screen name={tabs.orders.title} component={AdminOrdersList} />
       <AdminTab.Screen name={tabs.users.title} component={AdminUsers} />
-      <AdminTab.Screen name={tabs.more.title} component={AdminMore} />
+      <AdminTab.Screen name={tabs.more.title} component={AdminMoreOptions} />
     </AdminTab.Navigator>
   );
 }
@@ -87,6 +94,14 @@ export default function AdminNavigator({ navigation }) {
         <AdminStack.Screen name="AdminItemDetail" component={AdminItemDetail} />
         <AdminStack.Screen name="AdminUserDetail" component={AdminUserDetail} />
         <AdminStack.Screen name="AdminOrderDetail" component={AdminOrderDetail} />
+
+        <AdminStack.Screen name="AdminInventoryLocations" component={AdminInventoryLocations} />
+        <AdminStack.Screen name="AdminProductBrands" component={AdminProductBrands} />
+        <AdminStack.Screen name="AdminProductTags" component={AdminProductTags} />
+        <AdminStack.Screen name="AdminPromotions" component={AdminPromotions} />
+        <AdminStack.Screen name="AdminShippingOptions" component={AdminShippingOptions} />
+        <AdminStack.Screen name="AdminStoreSettings" component={AdminStoreSettings} />
+        <AdminStack.Screen name="AdminTaxRates" component={AdminTaxRates} />
       </AdminStack.Navigator>
   );
 }
