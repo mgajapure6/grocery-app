@@ -633,7 +633,8 @@ export default function AdminOrdersList({ navigation, route }) {
             transparent={true}
             visible={isInputModalVisible}
             onRequestClose={closeInputModal}
-        > <BlurView intensity={10} tint="light" style={StyleSheet.absoluteFill}>
+        > 
+        <BlurView intensity={10} tint="light" style={StyleSheet.absoluteFill}>
                 <TouchableOpacity
                     className="flex-1 justify-center items-center"
                     activeOpacity={1}
